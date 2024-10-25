@@ -8,6 +8,45 @@
     <link rel="stylesheet" href="./Assets/css/styles.css">
 </head>
 <body>
+    <!-- Header -->
+     <header class="main-header">
+        <nav class="navbar navbar-expand-lg pt-3">
+            <div class="container-fluid px-3 px-lg-5">
+                <!-- Logo & Name -->
+                <div class="d-flex align-items-center">
+                    <img src="./Assets/img/TaskPlannerLogo.jpg" alt="Task Planner Logo" class="img-logo">
+                    <h4 class="fs-6 mx-3 mt-2">Task <span class="brand-name-span">Planner</span></h4>
+                </div>
+
+                <!-- Mobile Nav -->
+                <div class="collapse navbar-collapse justify-content-end" id="navbar-collapse-toggle">
+                    <ul class="navbar-nav">
+                        <li>
+                            <a href="#" class="nav-link">Dashboard</a>
+                        </li>
+                        <li>
+                            <a href="#" class="nav-link">Task</a>
+                        </li>
+                        <li>
+                            <a href="#" class="nav-link">Project</a>
+                        </li>
+                        <li>
+                            <a href="#" class="nav-link">Profile</a>
+                        </li>
+                        <form class="d-flex">
+                            <input class="search-input form-control me-2" type="search" placeholder="Search" aria-label="Search">
+                            <button class="btn btn-outline-success" type="submit">Search</button>
+                        </form>
+                    </ul>
+                </div>
+                <!-- Mobile Nav Button -->
+                <button class="navbar-toggler collapsed" type="buttton" data-bs-toggle="collapse" data-bs-target="#navbar-collapse-toggle"><span class="toggle"></span><span class="toggle"></span><span class="toggle"></span></button>
+            </div>
+        </nav>
+     </header>
+
+    <!-- Main -->
+    <main></main>
 
     <script src="./node_modules/bootstrap/dist/js/bootstrap.bundle.js"></script>
     <script src="./Assets/js/main.js"></script>

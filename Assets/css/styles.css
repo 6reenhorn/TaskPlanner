@@ -1,0 +1,117 @@
+@import url('https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,100..900;1,100..900&display=swap');
+
+:root {
+    --primary-color: #FF651C;
+    --dark-color: #373737;
+}
+
+body {
+    font-family: "Jost", sans-serif;
+    color: var(--dark-color);
+}
+
+/* Header */
+.main-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+}
+
+.main-header .img-logo {
+    width: 50px;
+    border-radius: 50%;
+    box-shadow: 0 0 3px var(--dark-color);
+}
+
+.main-header .brand-name-span {
+    color: var(--primary-color);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    position: relative;
+}
+
+.main-header .brand-name-span:after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    background: var(--primary-color);
+    height: 2px;
+    width: 100%;
+}
+
+.main-header .navbar-nav > li {
+    margin: 0 25px 0 10px;
+}
+
+.main-header .navbar-nav > li a {
+    color: var(--dark-color);
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 1px;
+    position: relative;
+}
+
+.main-header .navbar-nav > li a:after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    left: auto;
+    width: 0;
+    height: 2px;
+    background: var(--primary-color);
+    transition: ease all 0.3s;
+}
+
+.main-header .navbar-nav > li a:hover {
+    color: var(--primary-color);
+}
+
+.main-header .navbar-nav > li a:hover:after {
+    left: 0;
+    right: auto;
+    width: 100%;
+}
+
+.main-header .search-input {
+    border: 2px solid var(--dark-color);
+}
+
+.main-header .btn {
+    border: 2px solid var(--primary-color);
+    color: var(--primary-color);
+    box-shadow: 3px 3px var(--dark-color);
+}
+
+@media (max-width: 991px) {
+    .main-header .navbar-toggler {
+        display: flex;
+        flex-direction: column;
+        border: none;
+        padding: 4px 9px;
+        outline: none;
+        box-shadow: none;
+    }
+    
+    .main-header .toggle {
+        width: 25px;
+        height: 2px;
+        background: var(--dark-color);
+        margin: 3px;
+    }
+
+    .main-header ul > li:nth-child(4) {
+        padding-bottom: 8px;
+    }
+
+    .main-header .navbar-collapse {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        padding: 15px;
+    } 
+}
+
