@@ -10,7 +10,7 @@
 <body>
     <!-- Header -->
      <header class="main-header">
-        <nav class="navbar navbar-expand-lg pt-3">
+        <nav class="navbar navbar-expand-lg py-2">
             <div class="container-fluid px-3 px-lg-5">
                 <!-- Logo & Name -->
                 <div class="d-flex align-items-center">
@@ -46,7 +46,170 @@
      </header>
 
     <!-- Main -->
-    <main></main>
+    <main>
+        <section class="dashboard" aria-labelledby="dashboard-region">
+            <div class="container-fluid">
+                <div class="row d-flex align-items-center">
+                    <div class="col-10 fs-5 text-start">
+                        Hello, <span class="fs-4 username">[username]</span>!
+                    </div>
+                    <div class="col-2 text-end">
+                        <span class="current-date">01/10/24</span>
+                    </div>
+                </div>
+                <div class="row my-5 d-flex justify-content-between">
+                    <div class="col-lg-auto">
+                        <button class="upper-btn btn" type="button">+ New Task</button>
+                    </div>
+                    <div class="col-lg-auto">
+                        <button class="upper-btn btn" type="button">Today's Task</button>
+                    </div>
+                    <div class="col-lg-auto">
+                        <button class="upper-btn btn" type="button">Deadlines</button>
+                    </div>
+                    <div class="col-lg-auto">
+                        <button class="upper-btn btn" type="button">Team Overview</button>
+                    </div>
+                    <div class="col-lg-auto">
+                        <button class="upper-btn btn" type="button">Client Overview</button>
+                    </div>
+                </div>
+                <h2 class="fs-5 mx-5 upcoming-task-title">Upcoming Task:</h2>
+                <div class="row upcoming-task mx-5 my-1 py-2">
+                    <div class="row my-1 align-items-center mb-2">
+                        <div class="col-3 upcoming-task-text">
+                            <span>1.</span> [Task Title]
+                        </div>
+                        <div class="col-3 upcoming-task-text">
+                            Due Date: <span>01/10/24</span>
+                        </div>
+                        <div class="col-3">
+                            <button class="upcoming-task-btn">Edit</button>
+                        </div>
+                        <div class="col-3">
+                            <button class="upcoming-task-btn">Mark as Done</button>
+                        </div>
+                    </div>
+                    <div class="row my-1 align-items-center mb-2">
+                        <div class="col-3 upcoming-task-text">
+                            <span>2.</span> [Task Title]
+                        </div>
+                        <div class="col-3 upcoming-task-text">
+                            Due Date: <span>01/10/24</span>
+                        </div>
+                        <div class="col-3">
+                            <button class="upcoming-task-btn">Edit</button>
+                        </div>
+                        <div class="col-3">
+                            <button class="upcoming-task-btn">Mark as Done</button>
+                        </div>
+                    </div>
+                    <div class="row my-1 align-items-center mb-2">
+                        <div class="col-3 upcoming-task-text">
+                            <span>3.</span> [Task Title]
+                        </div>
+                        <div class="col-3 upcoming-task-text">
+                            Due Date: <span>01/10/24</span>
+                        </div>
+                        <div class="col-3">
+                            <button class="upcoming-task-btn">Edit</button>
+                        </div>
+                        <div class="col-3">
+                            <button class="upcoming-task-btn">Mark as Done</button>
+                        </div>
+                    </div>
+                    <div class="row my-1 align-items-center mb-2">
+                        <div class="col-3 upcoming-task-text">
+                            <span>4.</span> [Task Title]
+                        </div>
+                        <div class="col-3 upcoming-task-text">
+                            Due Date: <span>01/10/24</span>
+                        </div>
+                        <div class="col-3">
+                            <button class="upcoming-task-btn">Edit</button>
+                        </div>
+                        <div class="col-3">
+                            <button class="upcoming-task-btn">Mark as Done</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="row progress-chart my-5">
+                    <div class="col-10">
+                        <p>
+                            <span class="progress-text">[Progress]</span> - Completed (<span class="progress-perccentage">75%</span>)
+                        </p>
+                    </div>
+                    <div class="col-2 text-end">
+                        <button class="upper-btn btn" type="button">Mini Calendar</button>
+                    </div>
+                </div>
+                <h2 class="fs-5 mx-5">Recent Activity</h2>
+                <div class="row recent-activity dashboard-section-scroll mx-5 my-1 p-2 px-5">
+                    <div class="row my-1 align-items-center mb-2 recent-activity-text">
+                        <div class="col-6">
+                            <span>1.</span> [Task Title]
+                        </div>
+                        <div class="col-6">
+                            <span>(Completed)</span>
+                        </div>
+                    </div>
+                    <div class="row my-1 align-items-center mb-2 recent-activity-text">
+                        <div class="col-6">
+                            <span>2.</span> [Task Title]
+                        </div>
+                        <div class="col-6">
+                            <span>(Added)</span>
+                        </div>
+                    </div>
+                    <div class="row my-1 align-items-center mb-2 recent-activity-text">
+                        <div class="col-6">
+                            <span>3.</span> [Task Title]
+                        </div>
+                        <div class="col-6">
+                            <span>(Completed)</span>
+                        </div>
+                    </div>
+                    <div class="row my-1 align-items-center mb-2 recent-activity-text">
+                        <div class="col-6">
+                            <span>4.</span> [Task Title]
+                        </div>
+                        <div class="col-6">
+                            <span>(Completed)</span>
+                        </div>
+                    </div>
+                    <div class="row my-1 align-items-center mb-2 recent-activity-text">
+                        <div class="col-6">
+                            <span>5.</span> [Task Title]
+                        </div>
+                        <div class="col-6">
+                            <span>(Added)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="main-footer">
+        <div class="row footer pt-3">
+            <div class="col-8 px-5">
+                <p>
+                    <span class="fw-bold">Copyright © 2024</span> Task Planner | <span class="fw-bold">All Rights Reserved</span> | Designed by: TP Corp. 
+                </p>
+            </div>
+            <div class="col-2 text-center">
+                <a href="#" target="_blank">
+                    Legal Stuff
+                </a>
+            </div>
+            <div class="col-2 text-center">
+                <a href="#" target="_blank">
+                    Privacy Policy
+                </a>
+            </div>
+        </div>
+    </footer>
 
     <script src="./node_modules/bootstrap/dist/js/bootstrap.bundle.js"></script>
     <script src="./Assets/js/main.js"></script>

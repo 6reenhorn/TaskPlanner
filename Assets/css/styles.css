@@ -8,6 +8,7 @@
 body {
     font-family: "Jost", sans-serif;
     color: var(--dark-color);
+    overflow-x: hidden;
 }
 
 /* Header */
@@ -16,6 +17,8 @@ body {
     top: 0;
     left: 0;
     right: 0;
+    box-shadow: 0 1px 2px 1px #b0b0b0;
+    background-color: #FFFFFF;
 }
 
 .main-header .img-logo {
@@ -85,6 +88,14 @@ body {
     box-shadow: 3px 3px var(--dark-color);
 }
 
+.main-header .btn:hover {
+    border: 2px solid var(--dark-color);
+    color: var(--primary-color);
+    background: var(--dark-color);
+    box-shadow: 3px 3px var(--primary-color);
+    transition: ease-in all 0.2s;
+}
+
 @media (max-width: 991px) {
     .main-header .navbar-toggler {
         display: flex;
@@ -112,6 +123,118 @@ body {
         left: 0;
         right: 0;
         padding: 15px;
+        background-color: #FFFFFF;
     } 
 }
 
+/* Main */
+.dashboard {
+    height: 90vh;
+}
+
+.dashboard .row {
+    margin-top: 110px;
+    padding: 0 50px 0 45px;
+}
+
+.dashboard .username {
+    color: var(--primary-color);
+    font-weight: 500;
+}
+
+.dashboard .current-date {
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.dashboard .upper-btn {
+    border: 2px solid var(--dark-color);
+    color: var(--dark-color);
+    font-size: 11px;
+    font-weight: 600;
+    width: 150px;
+    background-color: rgb(242, 240, 240);
+}
+
+.dashboard .upper-btn:hover {
+    border: 2px solid var(--primary-color);
+    color: var(--primary-color);
+    background-color: var(--dark-color);
+    transition: ease-in all 0.2s;
+}
+
+.dashboard .upcoming-task {
+    background-color: rgb(242, 240, 240);
+    border-radius: 5px;
+    height: 125px;
+    overflow-y: scroll;
+}
+
+.dashboard .upcoming-task-text {
+    font-size: 13px;
+}
+
+.dashboard .upcoming-task-btn {
+    border: 1px solid var(--dark-color);
+    font-size: 10px;
+    width: 100px;
+    height: 20px;
+    border-radius: 5px;
+}
+
+.dashboard .recent-activity {
+    background-color: rgb(242, 240, 240);
+    border-radius: 5px;
+    overflow-y: scroll;
+    height: 125px;
+}
+
+.dashboard .recent-activity-text {
+    font-size: 13px;
+}
+
+.dashboard .progress-text {
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--primary-color);
+}
+
+/* Footer */
+.main-footer .footer {
+    height: 40px;
+    background-color: #f1f1f1;
+    box-shadow: 0 -1px 2px #c3c3c3;
+}
+
+.main-footer .footer p:first-child {
+    padding-left: 25px;
+}
+
+.main-footer .footer a {
+    text-decoration: none;
+    color: var(--dark-color);
+    font-weight: 600;
+    position: relative;
+}
+
+.main-footer .footer a:after {
+    content: "";
+    position: absolute;
+    left: auto;
+    bottom: 0;
+    right: 0;
+    width: 0;
+    height: 2px;
+    background: var(--primary-color);
+    transition: ease-in all 0.3s;
+}
+
+.main-footer .footer a:hover {
+    color: var(--primary-color);
+}
+
+.main-footer .footer a:hover:after {
+    left: 0;
+    right: auto;
+    width: 100%;
+}
