@@ -3,6 +3,7 @@
 :root {
     --primary-color: #FF651C;
     --dark-color: #373737;
+    --border-color: rgb(216, 216, 216);
 }
 
 body {
@@ -148,7 +149,7 @@ body {
 }
 
 .dashboard .upper-btn {
-    border: 2px solid var(--dark-color);
+    border: 2px solid var(--border-color);
     color: var(--dark-color);
     font-size: 11px;
     font-weight: 600;
@@ -159,6 +160,8 @@ body {
 .dashboard .upper-btn:hover {
     border: 2px solid var(--primary-color);
     color: var(--primary-color);
+    font-size: 12px;
+    padding: 5px 0 5px 0;
     background-color: var(--dark-color);
     transition: ease-in all 0.2s;
 }
@@ -168,6 +171,8 @@ body {
     border-radius: 5px;
     height: 125px;
     overflow-y: scroll;
+    border-top: 4px double rgb(242, 240, 240);
+    border-bottom: 4px double rgb(242, 240, 240);
 }
 
 .dashboard .upcoming-task-text {
@@ -175,11 +180,13 @@ body {
 }
 
 .dashboard .upcoming-task-btn {
-    border: 1px solid var(--dark-color);
+    color: #FFFFFF;
+    border: 1px solid var(--border-color);
     font-size: 10px;
     width: 100px;
-    height: 20px;
+    height: 19px;
     border-radius: 5px;
+    background-color: rgb(0, 153, 255);
 }
 
 .dashboard .recent-activity {
@@ -187,6 +194,8 @@ body {
     border-radius: 5px;
     overflow-y: scroll;
     height: 125px;
+    border-top: 4px double rgb(242, 240, 240);
+    border-bottom: 4px double rgb(242, 240, 240);
 }
 
 .dashboard .recent-activity-text {
@@ -201,7 +210,6 @@ body {
 
 /* Footer */
 .main-footer .footer {
-    height: 40px;
     background-color: #f1f1f1;
     box-shadow: 0 -1px 2px #c3c3c3;
 }
