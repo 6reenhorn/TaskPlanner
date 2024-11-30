@@ -1,9 +1,16 @@
 @import url('https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,100..900;1,100..900&display=swap');
 
 :root {
-    --primary-color: #FF651C;
-    --dark-color: #373737;
-    --border-color: rgb(216, 216, 216);
+    --primary-color: #2E2E2E;
+    --secondary-color: #283593;
+    --accent-color-1: #FFA726;
+    --accent-color-2: #F5F5F5;
+    --accent-color-3: #3FAFAF;
+    --border-color-1: #3FAFAF;
+    --highlight-color-1: #4169E1;
+    --bg-color-1: #4A4A4A;
+    --bg-color-2: #363636;
+    --txt-color-1: #FFFFFF;
 }
 
 body {
@@ -14,22 +21,23 @@ body {
 
 /* Header */
 .main-header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    box-shadow: 0 1px 2px 1px #b0b0b0;
-    background-color: #FFFFFF;
+    background: var(--primary-color);
+    color: var(--txt-color-1);
 }
 
 .main-header .img-logo {
     width: 50px;
     border-radius: 50%;
-    box-shadow: 0 0 3px var(--dark-color);
+}
+
+.main-header .nav-profile-logo img {
+    width: 25px;
+    height:25px;
+    border-radius: 50%;
 }
 
 .main-header .brand-name-span {
-    color: var(--primary-color);
+    color: var(--accent-color-1);
     text-transform: uppercase;
     letter-spacing: 2px;
     position: relative;
@@ -40,7 +48,7 @@ body {
     position: absolute;
     bottom: 0;
     left: 0;
-    background: var(--primary-color);
+    background: var(--accent-color-1);
     height: 2px;
     width: 100%;
 }
@@ -50,9 +58,9 @@ body {
 }
 
 .main-header .navbar-nav > li a {
-    color: var(--dark-color);
+    color: var(--txt-color-1);
     font-weight: 600;
-    font-size: 14px;
+    font-size: 12px;
     letter-spacing: 1px;
     position: relative;
 }
@@ -65,12 +73,12 @@ body {
     left: auto;
     width: 0;
     height: 2px;
-    background: var(--primary-color);
+    background: var(--accent-color-1);
     transition: ease all 0.3s;
 }
 
 .main-header .navbar-nav > li a:hover {
-    color: var(--primary-color);
+    color: var(--accent-color-1);
 }
 
 .main-header .navbar-nav > li a:hover:after {
@@ -80,21 +88,25 @@ body {
 }
 
 .main-header .search-input {
-    border: 2px solid var(--dark-color);
+    font-size: 12px;
+    border: 2px solid var(--accent-color-3);
+    width: 200px;
+    height: 35px;
 }
 
 .main-header .btn {
-    border: 2px solid var(--primary-color);
-    color: var(--primary-color);
-    box-shadow: 3px 3px var(--dark-color);
+    border: 2px solid var(--border-color-1);
+    color: var(--border-color-1);
+    background: var(--accent-color-2);
+    font-size: 12px;
+    height: 35px;
+    transition: ease all 0.3s;
 }
 
 .main-header .btn:hover {
-    border: 2px solid var(--dark-color);
-    color: var(--primary-color);
-    background: var(--dark-color);
-    box-shadow: 3px 3px var(--primary-color);
-    transition: ease-in all 0.2s;
+    border: 2px solid var(--accent-color-1);
+    color: var(--accent-color-1);
+    font-size: 13px;
 }
 
 @media (max-width: 991px) {
@@ -110,7 +122,7 @@ body {
     .main-header .toggle {
         width: 25px;
         height: 2px;
-        background: var(--dark-color);
+        background: var(--secondary-color);
         margin: 3px;
     }
 
@@ -129,50 +141,55 @@ body {
 }
 
 /* Main */
+/* Dashboard */
 .dashboard {
-    height: 90vh;
+    height: 100vh;
+    background: var(--bg-color-1);
+    padding-top: 40px;
+    color: var(--txt-color-1);
+    /* display: none; */
 }
 
 .dashboard .row {
-    margin-top: 110px;
     padding: 0 50px 0 45px;
 }
 
 .dashboard .username {
-    color: var(--primary-color);
+    color: var(--accent-color-1);
     font-weight: 500;
 }
 
 .dashboard .current-date {
     font-size: 15px;
-    font-weight: 600;
+    font-weight: 300;
 }
 
 .dashboard .upper-btn {
-    border: 2px solid var(--border-color);
-    color: var(--dark-color);
+    border: 2px solid var(--accent-color-3);
+    color: var(--accent-color-3);
     font-size: 11px;
     font-weight: 600;
     width: 150px;
-    background-color: rgb(242, 240, 240);
+    background-color: var(--bg-color-2);
 }
 
 .dashboard .upper-btn:hover {
-    border: 2px solid var(--primary-color);
-    color: var(--primary-color);
+    border: 2px solid var(--accent-color-1);
+    color: var(--accent-color-2);
     font-size: 12px;
     padding: 5px 0 5px 0;
-    background-color: var(--dark-color);
+    background-color: var(--bg-color-1);
     transition: ease-in all 0.2s;
 }
 
 .dashboard .upcoming-task {
-    background-color: rgb(242, 240, 240);
+    background-color: var(--bg-color-2);
     border-radius: 5px;
-    height: 125px;
+    height: 135px;
     overflow-y: scroll;
     border-top: 4px double rgb(242, 240, 240);
     border-bottom: 4px double rgb(242, 240, 240);
+    border-left: 4px double rgb(242, 240, 240);
 }
 
 .dashboard .upcoming-task-text {
@@ -180,22 +197,27 @@ body {
 }
 
 .dashboard .upcoming-task-btn {
-    color: #FFFFFF;
-    border: 1px solid var(--border-color);
-    font-size: 10px;
+    color: var(--highlight-color-1);
+    border: 2px solid var(--accent-color-3);
     width: 100px;
     height: 19px;
     border-radius: 5px;
-    background-color: rgb(0, 153, 255);
+    background: var(--accent-color-2);
+    font-size: small; 
+}
+
+.dashboard .task-checkbox {
+    height: 10px;
 }
 
 .dashboard .recent-activity {
-    background-color: rgb(242, 240, 240);
+    background-color: var(--bg-color-2);
     border-radius: 5px;
     overflow-y: scroll;
-    height: 125px;
+    height: 135px;
     border-top: 4px double rgb(242, 240, 240);
     border-bottom: 4px double rgb(242, 240, 240);
+    border-left: 4px double rgb(242, 240, 240);
 }
 
 .dashboard .recent-activity-text {
@@ -205,13 +227,22 @@ body {
 .dashboard .progress-text {
     font-weight: 600;
     text-transform: uppercase;
-    color: var(--primary-color);
+    color: var(--accent-color-1);
 }
+
+/* Task Management Page */
+
+
+
+
+
 
 /* Footer */
 .main-footer .footer {
-    background-color: #f1f1f1;
-    box-shadow: 0 -1px 2px #c3c3c3;
+    background-color: var(--bg-color-2);
+    box-shadow: 0 -1px 2px;
+    font-size: 12px;
+    color: var(--accent-color-2);
 }
 
 .main-footer .footer p:first-child {
@@ -220,7 +251,7 @@ body {
 
 .main-footer .footer a {
     text-decoration: none;
-    color: var(--dark-color);
+    color: var(--accent-color-2);
     font-weight: 600;
     position: relative;
 }
@@ -233,12 +264,12 @@ body {
     right: 0;
     width: 0;
     height: 2px;
-    background: var(--primary-color);
+    background: var(--accent-color-1);
     transition: ease-in all 0.3s;
 }
 
 .main-footer .footer a:hover {
-    color: var(--primary-color);
+    color: var(--accent-color-1);
 }
 
 .main-footer .footer a:hover:after {

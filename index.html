@@ -20,18 +20,23 @@
 
                 <!-- Mobile Nav -->
                 <div class="collapse navbar-collapse justify-content-end" id="navbar-collapse-toggle">
-                    <ul class="navbar-nav">
+                    <ul class="navbar-nav d-flex align-items-center">
                         <li>
                             <a href="#" class="nav-link">Dashboard</a>
                         </li>
                         <li>
-                            <a href="#" class="nav-link">Task</a>
+                            <a href="#" class="nav-link">Task Management</a>
                         </li>
                         <li>
-                            <a href="#" class="nav-link">Project</a>
+                            <a href="#" class="nav-link">Project Management</a>
                         </li>
                         <li>
-                            <a href="#" class="nav-link">Profile</a>
+                            <a href="#" class="nav-link">Collaboration</a>
+                        </li>
+                        <li>
+                            <a href="#" class="nav-link nav-profile-logo">
+                                <img src="" alt="">
+                            </a>
                         </li>
                         <form class="d-flex">
                             <input class="search-input form-control me-2" type="search" placeholder="Search" aria-label="Search">
@@ -47,6 +52,7 @@
 
     <!-- Main -->
     <main>
+        <!-- Dashboard Page -->
         <section class="dashboard" aria-labelledby="dashboard-region">
             <div class="container-fluid">
                 <div class="row d-flex align-items-center">
@@ -57,80 +63,95 @@
                         <span class="current-date">01/10/24</span>
                     </div>
                 </div>
-                <div class="row my-5 d-flex justify-content-between">
-                    <div class="col-lg-auto">
-                        <button class="upper-btn btn" type="button">+ New Task</button>
-                    </div>
+                <div class="row my-5 d-flex justify-content-start">
                     <div class="col-lg-auto">
                         <button class="upper-btn btn" type="button">Today's Task</button>
                     </div>
                     <div class="col-lg-auto">
                         <button class="upper-btn btn" type="button">Deadlines</button>
                     </div>
-                    <div class="col-lg-auto">
-                        <button class="upper-btn btn" type="button">Team Overview</button>
-                    </div>
-                    <div class="col-lg-auto">
-                        <button class="upper-btn btn" type="button">Client Overview</button>
-                    </div>
                 </div>
-                <h2 class="fs-5 mx-5 upcoming-task-title">Upcoming Task:</h2>
+                <h2 class="fs-5 mx-5 upcoming-task-title">Upcoming Task</h2>
                 <div class="row upcoming-task mx-5 my-1 py-2">
                     <div class="row my-1 d-flex align-items-center mb-2">
-                        <div class="col-3 upcoming-task-text">
-                            <span>1.</span> [Task Title]
+                        <div class="col-6 d-flex justify-content-between">
+                            <div class="upcoming-task-text">
+                                <span>1.</span> [Task Title]
+                            </div>
+                            <div class="upcoming-task-text">
+                                Due Date: <span>01/10/24</span>
+                            </div>
                         </div>
-                        <div class="col-3 upcoming-task-text">
-                            Due Date: <span>01/10/24</span>
-                        </div>
-                        <div class="col-3">
-                            <button class="upcoming-task-btn" type="button">Edit</button>
-                        </div>
-                        <div class="col-3">
-                            <button class="upcoming-task-btn" type="button">Mark as Done</button>
-                        </div>
+                        <div class="col-6 d-flex justify-content-end gap-5">
+                            <div class="">
+                                <button class="upcoming-task-btn" type="button">Edit</button>
+                            </div>
+                            <div class="task-checkbox">
+                                <form action="">
+                                    <input type="checkbox" id="task-completion" name="task-completion" value="Finished">
+                                </form>
+                            </div>
+                        </div> 
                     </div>
                     <div class="row my-1 d-flex align-items-center mb-2">
-                        <div class="col-3 upcoming-task-text">
-                            <span>2.</span> [Task Title]
+                        <div class="col-6 d-flex justify-content-between">
+                            <div class="upcoming-task-text">
+                                <span>1.</span> [Task Title]
+                            </div>
+                            <div class="upcoming-task-text">
+                                Due Date: <span>01/10/24</span>
+                            </div>
                         </div>
-                        <div class="col-3 upcoming-task-text">
-                            Due Date: <span>01/10/24</span>
-                        </div>
-                        <div class="col-3">
-                            <button class="upcoming-task-btn" type="button">Edit</button>
-                        </div>
-                        <div class="col-3">
-                            <button class="upcoming-task-btn" type="button">Mark as Done</button>
-                        </div>
+                        <div class="col-6 d-flex justify-content-end gap-5">
+                            <div class="">
+                                <button class="upcoming-task-btn" type="button">Edit</button>
+                            </div>
+                            <div class="task-checkbox">
+                                <form action="">
+                                    <input type="checkbox" id="task-completion" name="task-completion" value="Finished">
+                                </form>
+                            </div>
+                        </div> 
                     </div>
                     <div class="row my-1 d-flex align-items-center mb-2">
-                        <div class="col-3 upcoming-task-text">
-                            <span>3.</span> [Task Title]
+                        <div class="col-6 d-flex justify-content-between">
+                            <div class="upcoming-task-text">
+                                <span>1.</span> [Task Title]
+                            </div>
+                            <div class="upcoming-task-text">
+                                Due Date: <span>01/10/24</span>
+                            </div>
                         </div>
-                        <div class="col-3 upcoming-task-text">
-                            Due Date: <span>01/10/24</span>
-                        </div>
-                        <div class="col-3">
-                            <button class="upcoming-task-btn" type="button">Edit</button>
-                        </div>
-                        <div class="col-3">
-                            <button class="upcoming-task-btn" type="button">Mark as Done</button>
-                        </div>
+                        <div class="col-6 d-flex justify-content-end gap-5">
+                            <div>
+                                <button class="upcoming-task-btn" type="button">Edit</button>
+                            </div>
+                            <div class="task-checkbox">
+                                <form action="">
+                                    <input type="checkbox" id="task-completion" name="task-completion" value="Finished">
+                                </form>
+                            </div>
+                        </div> 
                     </div>
                     <div class="row my-1 d-flex align-items-center mb-2">
-                        <div class="col-3 upcoming-task-text">
-                            <span>4.</span> [Task Title]
+                        <div class="col-6 d-flex justify-content-between">
+                            <div class="upcoming-task-text">
+                                <span>1.</span> [Task Title]
+                            </div>
+                            <div class="upcoming-task-text">
+                                Due Date: <span>01/10/24</span>
+                            </div>
                         </div>
-                        <div class="col-3 upcoming-task-text">
-                            Due Date: <span>01/10/24</span>
-                        </div>
-                        <div class="col-3">
-                            <button class="upcoming-task-btn" type="button">Edit</button>
-                        </div>
-                        <div class="col-3">
-                            <button class="upcoming-task-btn" type="button">Mark as Done</button>
-                        </div>
+                        <div class="col-6 d-flex justify-content-end gap-5">
+                            <div class="">
+                                <button class="upcoming-task-btn" type="button">Edit</button>
+                            </div>
+                            <div class="task-checkbox">
+                                <form action="">
+                                    <input type="checkbox" id="task-completion" name="task-completion" value="Finished">
+                                </form>
+                            </div>
+                        </div> 
                     </div>
                 </div>
                 <div class="row progress-chart my-5 mb-4">
@@ -188,6 +209,8 @@
                 </div>
             </div>
         </section>
+        <!-- Task Management Page -->
+        <section class="task-management d-none" aria-labelledby="task-management-region"></section>
     </main>
 
     <!-- Footer -->
