@@ -344,7 +344,7 @@ body {
     padding-top: 30px;
     background: var(--bg-color-1);
     color: var(--txt-color-1);
-    /* display: none; */
+    display: none;
 }
 
 .project-management .row {
@@ -432,6 +432,91 @@ body {
     margin-top: 8px;
 }
 
+
+/* Collaboration Page */
+.collaboration {
+    height: 100vh;
+    padding-top: 30px;
+    background: var(--bg-color-1);
+    color: var(--txt-color-1);
+    /* display: none; */
+}
+
+.collaboration .row {
+    padding: 0 50px 0 60px;
+}
+
+.collaboration .collaboration-heading-name {
+    color: var(--accent-color-1);
+}
+
+.collaboration .collaboration-main-btn {
+    margin: 30px 0 20px 0;
+}
+
+.collaboration .collaboration-main-btn button {
+    border: 2px solid var(--accent-color-3);
+    border-radius: 5px;
+    color: var(--accent-color-3);
+    font-size: 11px;
+    font-weight: 600;
+    width: 160px;
+    padding: 5px 0 5px 0;
+    background-color: var(--bg-color-2);
+}
+
+.collaboration .collaboration-main-btn button:hover {
+    border: 2px solid var(--accent-color-1);
+    color: var(--accent-color-2);
+    font-size: 12px;
+    padding: 4.3px 0 4.3px 0;
+    background-color: var(--bg-color-1);
+    transition: ease-in all 0.2s;
+}
+
+.collaboration .collaboration-card-container {
+    height: 73.5vh;
+    width: 95vw;
+    background: var(--bg-color-2);
+    overflow-y: scroll;
+    border-top: 4px double rgb(242, 240, 240);
+    border-bottom: 4px double rgb(242, 240, 240);
+    border-left: 4px double rgb(242, 240, 240);
+    border-radius: 5px;
+    padding: 10px 0 10px 0;
+    overflow-x: hidden;
+}
+
+.collaboration .collaboration-card-container .collaboration-card-text {
+    font-size: 12px;
+}
+
+.collaboration .collaboration-main-section .card {
+    width: 49%;
+}
+
+.collaboration .collaboration-card-container .collaboration-task-project-list {
+    width: 100%;
+    padding-left: 0;
+}
+
+.collaboration .collaboration-card-container .collaboration-list {
+    width: 100%;
+    height: 80px;
+    background: var(--bg-color-1);
+    overflow-y: scroll;
+    border: 4px double rgb(242, 240, 240);
+    border-radius: 5px;
+}
+
+.collaboration .collaboration-main-section .card-btn-group {
+    font-size: 11px;
+    border-radius: 5px;
+    border: 2px solid var(--bg-color-1);
+    background: var(--accent-color-2);
+    color: var(--primary-color);
+    padding: 0 25px 0 25px;
+}
 
 
 
