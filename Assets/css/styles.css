@@ -11,6 +11,7 @@
     --bg-color-1: #4A4A4A;
     --bg-color-2: #363636;
     --txt-color-1: #FFFFFF;
+    --card-bg-1: #ededed;
 }
 
 body {
@@ -147,7 +148,7 @@ body {
     background: var(--bg-color-1);
     padding-top: 40px;
     color: var(--txt-color-1);
-    /* display: none; */
+    display: none;
 }
 
 .dashboard .row {
@@ -230,8 +231,114 @@ body {
     color: var(--accent-color-1);
 }
 
-/* Task Management Page */
 
+/* Task Management Page */
+.task-management {
+    height: 100vh;
+    padding-top: 30px;
+    background: var(--bg-color-1);
+    color: var(--txt-color-1);
+    display: none;
+}
+
+.task-management .row {
+    padding: 0 50px 0 60px;
+}
+
+.task-management .task-heading-name {
+    color: var(--accent-color-1);
+}
+
+.task-management .task-main-btn {
+    margin: 30px 0 20px 0;
+}
+
+.task-management .task-main-btn .filter-dropdown {
+    border: 2px solid var(--accent-color-3);
+    border-radius: 5px;
+    font-size: 13px;
+    width: 100px;
+    padding: 3px 8px 3px 4px;
+    background: var(--bg-color-2);
+    color: var(--txt-color-1);
+}
+
+.task-management .task-main-btn button {
+    border: 2px solid var(--accent-color-3);
+    border-radius: 5px;
+    color: var(--accent-color-3);
+    font-size: 11px;
+    font-weight: 600;
+    width: 150px;
+    padding: 5px 0 5px 0;
+    background-color: var(--bg-color-2);
+}
+
+.task-management .task-main-btn button:hover {
+    border: 2px solid var(--accent-color-1);
+    color: var(--accent-color-2);
+    font-size: 12px;
+    padding: 4.3px 0 4.3px 0;
+    background-color: var(--bg-color-1);
+    transition: ease-in all 0.2s;
+}
+
+.task-management .task-card-container {
+    height: 73.5vh;
+    width: 95vw;
+    background: var(--bg-color-2);
+    overflow-y: scroll;
+    border-top: 4px double rgb(242, 240, 240);
+    border-bottom: 4px double rgb(242, 240, 240);
+    border-left: 4px double rgb(242, 240, 240);
+    border-radius: 5px;
+    padding: 10px 0 10px 0;
+    overflow-x: hidden;
+}
+
+.task-management .task-main-section .card-text {
+    font-size: 10px;
+    list-style: none;
+}
+
+.task-management .task-main-section .card-btn-group button {
+    font-size: 11px;
+    padding: 0 10px 0 10px;
+    border-radius: 5px;
+    border: 2px solid var(--bg-color-1);
+    background: var(--accent-color-2);
+    color: var(--primary-color);
+}
+
+.task-management .task-main-section .task-card-description {
+    width: 80%;
+    height: 80px;
+    background: var(--bg-color-1);
+    color: var(--txt-color-1);
+    padding: 10px;
+    font-size: 10px;
+    border-radius: 5px;
+    margin-top: 8px;
+}
+
+.task-management .task-main-section .profile-logo img {
+    width: 25px;
+    height: 25px;
+    border: 2px solid var(--bg-color-2);
+    border-radius: 50%;
+}
+
+.task-management .task-main-section .card {
+    width: 32%;
+}
+
+.task-management .task-main-section .card-bg {
+    background: var(--card-bg-1);
+    
+}
+
+
+/* Project Management Page */
 
 
 

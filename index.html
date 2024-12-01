@@ -96,7 +96,7 @@
                     <div class="row my-1 d-flex align-items-center mb-2">
                         <div class="col-6 d-flex justify-content-between">
                             <div class="upcoming-task-text">
-                                <span>1.</span> [Task Title]
+                                <span>2.</span> [Task Title]
                             </div>
                             <div class="upcoming-task-text">
                                 Due Date: <span>01/10/24</span>
@@ -116,7 +116,7 @@
                     <div class="row my-1 d-flex align-items-center mb-2">
                         <div class="col-6 d-flex justify-content-between">
                             <div class="upcoming-task-text">
-                                <span>1.</span> [Task Title]
+                                <span>3.</span> [Task Title]
                             </div>
                             <div class="upcoming-task-text">
                                 Due Date: <span>01/10/24</span>
@@ -136,7 +136,7 @@
                     <div class="row my-1 d-flex align-items-center mb-2">
                         <div class="col-6 d-flex justify-content-between">
                             <div class="upcoming-task-text">
-                                <span>1.</span> [Task Title]
+                                <span>4.</span> [Task Title]
                             </div>
                             <div class="upcoming-task-text">
                                 Due Date: <span>01/10/24</span>
@@ -209,8 +209,298 @@
                 </div>
             </div>
         </section>
+        
         <!-- Task Management Page -->
-        <section class="task-management d-none" aria-labelledby="task-management-region"></section>
+        <section class="task-management" aria-labelledby="task-management-region">
+            <div class="container-fluid">
+                <div class="row task-heading">
+                    <div class="col-12 fs-5 text-start">
+                        Manage your <span class="fs-4 task-heading-name">[Task]</span>
+                    </div>
+                </div>
+                <div class="row task-main-btn">
+                    <div class="col-auto">
+                        <label for="task-filter">Filter:</label>
+                        <select name="task-filter" id="task-filter" class="filter-dropdown">
+                            <option value="priority">Priority</option>
+                            <option value="due_date">Due Date</option>
+                            <option value="status">Status</option>
+                        </select>
+                    </div>
+                    <div class="col-lg-auto">
+                        <button type="button">+ New Task</button>
+                    </div>
+                    <div class="col-lg-auto">
+                        <button type="button">Download CSV</button>
+                    </div>
+                </div>
+                <div class="row task-main-section">
+                    <div class="col-12 task-card-container d-flex flex-column justify-content-around align-items-around">
+                        <div class="row d-flex justify-content-around my-2">
+                            <div class="col-4 card d-flex card-bg">
+                                <div class="card-header d-flex justify-content-between align-items-center my-0">
+                                    [Task Title]
+                                    <form action="">
+                                        <input type="checkbox" id="task-completion" name="task-completion" value="Finished">
+                                    </form>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="card-text mt-0">
+                                        <li>Due: <span>XX/XX/XXXX</span></li>
+                                        <li>Status: <span>In Progress</span></li>
+                                        <li>Priority: <span>High</span></li>
+                                    </ul>
+                                    <div class="card-btn-group d-flex gap-2">
+                                        <button type="button">Edit</button>
+                                        <button type="button">Delete</button>
+                                        <button type="button">Comment</button>
+                                    </div>
+                                    <div class="d-flex align-items-end gap-5">
+                                        <div class="col-auto task-card-description">
+                                            <p class="card-description-text">Description...</p>
+                                        </div>
+                                        <div class="col-auto profile-logo">
+                                            <img src="" alt="">
+                                        </div>    
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-4 card d-flex card-bg">
+                                <div class="card-header d-flex justify-content-between align-items-center my-0">
+                                    [Task Title]
+                                    <form action="">
+                                        <input type="checkbox" id="task-completion" name="task-completion" value="Finished">
+                                    </form>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="card-text mt-0">
+                                        <li>Due: <span>XX/XX/XXXX</span></li>
+                                        <li>Status: <span>In Progress</span></li>
+                                        <li>Priority: <span>High</span></li>
+                                    </ul>
+                                    <div class="card-btn-group d-flex gap-2">
+                                        <button type="button">Edit</button>
+                                        <button type="button">Delete</button>
+                                        <button type="button">Comment</button>
+                                    </div>
+                                    <div class="d-flex align-items-end gap-5">
+                                        <div class="col-auto task-card-description">
+                                            <p class="card-description-text">Description...</p>
+                                        </div>
+                                        <div class="col-auto profile-logo">
+                                            <img src="" alt="">
+                                        </div>    
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-4 card d-flex card-bg">
+                                <div class="card-header d-flex justify-content-between align-items-center my-0">
+                                    [Task Title]
+                                    <form action="">
+                                        <input type="checkbox" id="task-completion" name="task-completion" value="Finished">
+                                    </form>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="card-text mt-0">
+                                        <li>Due: <span>XX/XX/XXXX</span></li>
+                                        <li>Status: <span>In Progress</span></li>
+                                        <li>Priority: <span>High</span></li>
+                                    </ul>
+                                    <div class="card-btn-group d-flex gap-2">
+                                        <button type="button">Edit</button>
+                                        <button type="button">Delete</button>
+                                        <button type="button">Comment</button>
+                                    </div>
+                                    <div class="d-flex align-items-end gap-5">
+                                        <div class="col-auto task-card-description">
+                                            <p class="card-description-text">Description...</p>
+                                        </div>
+                                        <div class="col-auto profile-logo">
+                                            <img src="" alt="">
+                                        </div>    
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row d-flex justify-content-around my-2">
+                            <div class="col-4 card d-flex card-bg">
+                                <div class="card-header d-flex justify-content-between align-items-center my-0">
+                                    [Task Title]
+                                    <form action="">
+                                        <input type="checkbox" id="task-completion" name="task-completion" value="Finished">
+                                    </form>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="card-text mt-0">
+                                        <li>Due: <span>XX/XX/XXXX</span></li>
+                                        <li>Status: <span>In Progress</span></li>
+                                        <li>Priority: <span>High</span></li>
+                                    </ul>
+                                    <div class="card-btn-group d-flex gap-2">
+                                        <button type="button">Edit</button>
+                                        <button type="button">Delete</button>
+                                        <button type="button">Comment</button>
+                                    </div>
+                                    <div class="d-flex align-items-end gap-5">
+                                        <div class="col-auto task-card-description">
+                                            <p class="card-description-text">Description...</p>
+                                        </div>
+                                        <div class="col-auto profile-logo">
+                                            <img src="" alt="">
+                                        </div>    
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-4 card d-flex card-bg">
+                                <div class="card-header d-flex justify-content-between align-items-center my-0">
+                                    [Task Title]
+                                    <form action="">
+                                        <input type="checkbox" id="task-completion" name="task-completion" value="Finished">
+                                    </form>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="card-text mt-0">
+                                        <li>Due: <span>XX/XX/XXXX</span></li>
+                                        <li>Status: <span>In Progress</span></li>
+                                        <li>Priority: <span>High</span></li>
+                                    </ul>
+                                    <div class="card-btn-group d-flex gap-2">
+                                        <button type="button">Edit</button>
+                                        <button type="button">Delete</button>
+                                        <button type="button">Comment</button>
+                                    </div>
+                                    <div class="d-flex align-items-end gap-5">
+                                        <div class="col-auto task-card-description">
+                                            <p class="card-description-text">Description...</p>
+                                        </div>
+                                        <div class="col-auto profile-logo">
+                                            <img src="" alt="">
+                                        </div>    
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-4 card d-flex card-bg">
+                                <div class="card-header d-flex justify-content-between align-items-center my-0">
+                                    [Task Title]
+                                    <form action="">
+                                        <input type="checkbox" id="task-completion" name="task-completion" value="Finished">
+                                    </form>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="card-text mt-0">
+                                        <li>Due: <span>XX/XX/XXXX</span></li>
+                                        <li>Status: <span>In Progress</span></li>
+                                        <li>Priority: <span>High</span></li>
+                                    </ul>
+                                    <div class="card-btn-group d-flex gap-2">
+                                        <button type="button">Edit</button>
+                                        <button type="button">Delete</button>
+                                        <button type="button">Comment</button>
+                                    </div>
+                                    <div class="d-flex align-items-end gap-5">
+                                        <div class="col-auto task-card-description">
+                                            <p class="card-description-text">Description...</p>
+                                        </div>
+                                        <div class="col-auto profile-logo">
+                                            <img src="" alt="">
+                                        </div>    
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row d-flex justify-content-around my-2">
+                            <div class="col-4 card d-flex card-bg">
+                                <div class="card-header d-flex justify-content-between align-items-center my-0">
+                                    [Task Title]
+                                    <form action="">
+                                        <input type="checkbox" id="task-completion" name="task-completion" value="Finished">
+                                    </form>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="card-text mt-0">
+                                        <li>Due: <span>XX/XX/XXXX</span></li>
+                                        <li>Status: <span>In Progress</span></li>
+                                        <li>Priority: <span>High</span></li>
+                                    </ul>
+                                    <div class="card-btn-group d-flex gap-2">
+                                        <button type="button">Edit</button>
+                                        <button type="button">Delete</button>
+                                        <button type="button">Comment</button>
+                                    </div>
+                                    <div class="d-flex align-items-end gap-5">
+                                        <div class="col-auto task-card-description">
+                                            <p class="card-description-text">Description...</p>
+                                        </div>
+                                        <div class="col-auto profile-logo">
+                                            <img src="" alt="">
+                                        </div>    
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-4 card d-flex card-bg">
+                                <div class="card-header d-flex justify-content-between align-items-center my-0">
+                                    [Task Title]
+                                    <form action="">
+                                        <input type="checkbox" id="task-completion" name="task-completion" value="Finished">
+                                    </form>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="card-text mt-0">
+                                        <li>Due: <span>XX/XX/XXXX</span></li>
+                                        <li>Status: <span>In Progress</span></li>
+                                        <li>Priority: <span>High</span></li>
+                                    </ul>
+                                    <div class="card-btn-group d-flex gap-2">
+                                        <button type="button">Edit</button>
+                                        <button type="button">Delete</button>
+                                        <button type="button">Comment</button>
+                                    </div>
+                                    <div class="d-flex align-items-end gap-5">
+                                        <div class="col-auto task-card-description">
+                                            <p class="card-description-text">Description...</p>
+                                        </div>
+                                        <div class="col-auto profile-logo">
+                                            <img src="" alt="">
+                                        </div>    
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-4 card d-flex card-bg">
+                                <div class="card-header d-flex justify-content-between align-items-center my-0">
+                                    [Task Title]
+                                    <form action="">
+                                        <input type="checkbox" id="task-completion" name="task-completion" value="Finished">
+                                    </form>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="card-text mt-0">
+                                        <li>Due: <span>XX/XX/XXXX</span></li>
+                                        <li>Status: <span>In Progress</span></li>
+                                        <li>Priority: <span>High</span></li>
+                                    </ul>
+                                    <div class="card-btn-group d-flex gap-2">
+                                        <button type="button">Edit</button>
+                                        <button type="button">Delete</button>
+                                        <button type="button">Comment</button>
+                                    </div>
+                                    <div class="d-flex align-items-end gap-5">
+                                        <div class="col-auto task-card-description">
+                                            <p class="card-description-text">Description...</p>
+                                        </div>
+                                        <div class="col-auto profile-logo">
+                                            <img src="" alt="">
+                                        </div>    
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Project Management Page -->
+         <section class="project-management" aria-labelledby="project-management-region"></section>
     </main>
 
     <!-- Footer -->
