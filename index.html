@@ -500,7 +500,257 @@
         </section>
 
         <!-- Project Management Page -->
-         <section class="project-management" aria-labelledby="project-management-region"></section>
+         <section class="project-management" aria-labelledby="project-management-region">
+            <div class="container-fluid">
+                <div class="row project-heading">
+                    <div class="col-12 fs-5 text-start">
+                        Manage your <span class="fs-4 project-heading-name">[Project]</span>
+                    </div>
+                </div>
+                <div class="row project-main-btn">
+                    <div class="col-auto">
+                        <label for="project-filter">Filter:</label>
+                        <select name="task-filter" id="project-filter" class="filter-dropdown">
+                            <option value="priority">Start Date</option>
+                            <option value="due_date">End Date</option>
+                            <option value="status">Status</option>
+                        </select>
+                    </div>
+                    <div class="col-lg-auto">
+                        <button type="button">+ New Project</button>
+                    </div>
+                    <div class="col-lg-auto">
+                        <button type="button">Download CSV</button>
+                    </div>
+                </div>
+                <div class="row project-main-section">
+                    <div class="col-12 project-card-container d-flex flex-column justify-content-around align-items-around">
+                        <div class="row d-flex justify-content-between my-2">
+                            <div class="col-4 card d-flex card-bg">
+                                <div class="card-header d-flex justify-content-between align-items-center my-0">
+                                    [Project Title]
+                                    <form action="">
+                                        <input type="checkbox" id="task-completion" name="task-completion" value="Finished">
+                                    </form>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="card-text mt-0">
+                                        <li>Start Date: <span>XX/XX/XXXX</span></li>
+                                        <li>End Date: <span>XX/XX/XXXX</span></li>
+                                        <li>Status: <span>Active</span></li>
+                                    </ul>
+                                    <div class="project-card-description mt-0">
+                                        <p class="project-description-text">Description...</p>
+                                    </div>
+                                    <div class="d-flex gap-3 mt-3 justify-content-between">
+                                        <button type="button" class="card-btn-group">Edit</button>
+                                        <button type="button" class="card-btn-group">Delete</button>
+                                        <button type="button" class="card-btn-group">Comment</button>
+                                        <button type="button" class="card-btn-group">View Details</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-4 card d-flex card-bg">
+                                <div class="card-header d-flex justify-content-between align-items-center my-0">
+                                    [Project Title]
+                                    <form action="">
+                                        <input type="checkbox" id="task-completion" name="task-completion" value="Finished">
+                                    </form>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="card-text mt-0">
+                                        <li>Start Date: <span>XX/XX/XXXX</span></li>
+                                        <li>End Date: <span>XX/XX/XXXX</span></li>
+                                        <li>Status: <span>Active</span></li>
+                                    </ul>
+                                    <div class="project-card-description mt-0">
+                                        <p class="project-description-text">Description...</p>
+                                    </div>
+                                    <div class="d-flex gap-3 mt-3 justify-content-between">
+                                        <button type="button" class="card-btn-group">Edit</button>
+                                        <button type="button" class="card-btn-group">Delete</button>
+                                        <button type="button" class="card-btn-group">Comment</button>
+                                        <button type="button" class="card-btn-group">View Details</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-4 card d-flex card-bg">
+                                <div class="card-header d-flex justify-content-between align-items-center my-0">
+                                    [Project Title]
+                                    <form action="">
+                                        <input type="checkbox" id="task-completion" name="task-completion" value="Finished">
+                                    </form>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="card-text mt-0">
+                                        <li>Start Date: <span>XX/XX/XXXX</span></li>
+                                        <li>End Date: <span>XX/XX/XXXX</span></li>
+                                        <li>Status: <span>Active</span></li>
+                                    </ul>
+                                    <div class="project-card-description mt-0">
+                                        <p class="project-description-text">Description...</p>
+                                    </div>
+                                    <div class="d-flex gap-3 mt-3 justify-content-between">
+                                        <button type="button" class="card-btn-group">Edit</button>
+                                        <button type="button" class="card-btn-group">Delete</button>
+                                        <button type="button" class="card-btn-group">Comment</button>
+                                        <button type="button" class="card-btn-group">View Details</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row d-flex justify-content-between my-2">
+                            <div class="col-4 card d-flex card-bg">
+                                <div class="card-header d-flex justify-content-between align-items-center my-0">
+                                    [Project Title]
+                                    <form action="">
+                                        <input type="checkbox" id="task-completion" name="task-completion" value="Finished">
+                                    </form>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="card-text mt-0">
+                                        <li>Start Date: <span>XX/XX/XXXX</span></li>
+                                        <li>End Date: <span>XX/XX/XXXX</span></li>
+                                        <li>Status: <span>Active</span></li>
+                                    </ul>
+                                    <div class="project-card-description mt-0">
+                                        <p class="project-description-text">Description...</p>
+                                    </div>
+                                    <div class="d-flex gap-3 mt-3 justify-content-between">
+                                        <button type="button" class="card-btn-group">Edit</button>
+                                        <button type="button" class="card-btn-group">Delete</button>
+                                        <button type="button" class="card-btn-group">Comment</button>
+                                        <button type="button" class="card-btn-group">View Details</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-4 card d-flex card-bg">
+                                <div class="card-header d-flex justify-content-between align-items-center my-0">
+                                    [Project Title]
+                                    <form action="">
+                                        <input type="checkbox" id="task-completion" name="task-completion" value="Finished">
+                                    </form>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="card-text mt-0">
+                                        <li>Start Date: <span>XX/XX/XXXX</span></li>
+                                        <li>End Date: <span>XX/XX/XXXX</span></li>
+                                        <li>Status: <span>Active</span></li>
+                                    </ul>
+                                    <div class="project-card-description mt-0">
+                                        <p class="project-description-text">Description...</p>
+                                    </div>
+                                    <div class="d-flex gap-3 mt-3 justify-content-between">
+                                        <button type="button" class="card-btn-group">Edit</button>
+                                        <button type="button" class="card-btn-group">Delete</button>
+                                        <button type="button" class="card-btn-group">Comment</button>
+                                        <button type="button" class="card-btn-group">View Details</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-4 card d-flex card-bg">
+                                <div class="card-header d-flex justify-content-between align-items-center my-0">
+                                    [Project Title]
+                                    <form action="">
+                                        <input type="checkbox" id="task-completion" name="task-completion" value="Finished">
+                                    </form>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="card-text mt-0">
+                                        <li>Start Date: <span>XX/XX/XXXX</span></li>
+                                        <li>End Date: <span>XX/XX/XXXX</span></li>
+                                        <li>Status: <span>Active</span></li>
+                                    </ul>
+                                    <div class="project-card-description mt-0">
+                                        <p class="project-description-text">Description...</p>
+                                    </div>
+                                    <div class="d-flex gap-3 mt-3 justify-content-between">
+                                        <button type="button" class="card-btn-group">Edit</button>
+                                        <button type="button" class="card-btn-group">Delete</button>
+                                        <button type="button" class="card-btn-group">Comment</button>
+                                        <button type="button" class="card-btn-group">View Details</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row d-flex justify-content-between my-2">
+                            <div class="col-4 card d-flex card-bg">
+                                <div class="card-header d-flex justify-content-between align-items-center my-0">
+                                    [Project Title]
+                                    <form action="">
+                                        <input type="checkbox" id="task-completion" name="task-completion" value="Finished">
+                                    </form>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="card-text mt-0">
+                                        <li>Start Date: <span>XX/XX/XXXX</span></li>
+                                        <li>End Date: <span>XX/XX/XXXX</span></li>
+                                        <li>Status: <span>Active</span></li>
+                                    </ul>
+                                    <div class="project-card-description mt-0">
+                                        <p class="project-description-text">Description...</p>
+                                    </div>
+                                    <div class="d-flex gap-3 mt-3 justify-content-between">
+                                        <button type="button" class="card-btn-group">Edit</button>
+                                        <button type="button" class="card-btn-group">Delete</button>
+                                        <button type="button" class="card-btn-group">Comment</button>
+                                        <button type="button" class="card-btn-group">View Details</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-4 card d-flex card-bg">
+                                <div class="card-header d-flex justify-content-between align-items-center my-0">
+                                    [Project Title]
+                                    <form action="">
+                                        <input type="checkbox" id="task-completion" name="task-completion" value="Finished">
+                                    </form>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="card-text mt-0">
+                                        <li>Start Date: <span>XX/XX/XXXX</span></li>
+                                        <li>End Date: <span>XX/XX/XXXX</span></li>
+                                        <li>Status: <span>Active</span></li>
+                                    </ul>
+                                    <div class="project-card-description mt-0">
+                                        <p class="project-description-text">Description...</p>
+                                    </div>
+                                    <div class="d-flex gap-3 mt-3 justify-content-between">
+                                        <button type="button" class="card-btn-group">Edit</button>
+                                        <button type="button" class="card-btn-group">Delete</button>
+                                        <button type="button" class="card-btn-group">Comment</button>
+                                        <button type="button" class="card-btn-group">View Details</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-4 card d-flex card-bg">
+                                <div class="card-header d-flex justify-content-between align-items-center my-0">
+                                    [Project Title]
+                                    <form action="">
+                                        <input type="checkbox" id="task-completion" name="task-completion" value="Finished">
+                                    </form>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="card-text mt-0">
+                                        <li>Start Date: <span>XX/XX/XXXX</span></li>
+                                        <li>End Date: <span>XX/XX/XXXX</span></li>
+                                        <li>Status: <span>Active</span></li>
+                                    </ul>
+                                    <div class="project-card-description mt-0">
+                                        <p class="project-description-text">Description...</p>
+                                    </div>
+                                    <div class="d-flex gap-3 mt-3 justify-content-between">
+                                        <button type="button" class="card-btn-group">Edit</button>
+                                        <button type="button" class="card-btn-group">Delete</button>
+                                        <button type="button" class="card-btn-group">Comment</button>
+                                        <button type="button" class="card-btn-group">View Details</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+         </section>
     </main>
 
     <!-- Footer -->
