@@ -142,13 +142,20 @@ body {
 }
 
 /* Main */
+.main-container {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    height: 100vh;
+    background: var(--bg-color-1);
+}
+
 /* Dashboard */
 .dashboard {
     height: 100vh;
     background: var(--bg-color-1);
     padding-top: 40px;
     color: var(--txt-color-1);
-    display: none;
 }
 
 .dashboard .row {
@@ -238,7 +245,6 @@ body {
     padding-top: 30px;
     background: var(--bg-color-1);
     color: var(--txt-color-1);
-    display: none;
 }
 
 .task-management .row {
@@ -344,7 +350,6 @@ body {
     padding-top: 30px;
     background: var(--bg-color-1);
     color: var(--txt-color-1);
-    display: none;
 }
 
 .project-management .row {
@@ -439,7 +444,6 @@ body {
     padding-top: 30px;
     background: var(--bg-color-1);
     color: var(--txt-color-1);
-    /* display: none; */
 }
 
 .collaboration .row {
@@ -517,6 +521,329 @@ body {
     color: var(--primary-color);
     padding: 0 25px 0 25px;
 }
+
+
+/* Profile Page */
+.profile-page {
+    height: 100vh;
+    padding-top: 30px;
+    background: var(--bg-color-1);
+    color: var(--txt-color-1);
+}
+
+.profile-page .row {
+    padding: 0 50px 0 60px;
+}
+
+.profile-page .profile-heading-name {
+    color: var(--accent-color-1);
+}
+
+.profile-page .profile-user-information img {
+    width: 175px;
+    height: 200px;
+    border: 4px double rgb(242, 240, 240);
+    border-radius: 5px;
+}
+
+.profile-page .profile-user-information .user-profile-text {
+    font-size: 13px;
+}
+
+.profile-page .profile-user-information .user-profile-fullname {
+    font-size: 15px;
+}
+
+.profile-page .profile-user-information button {
+    border: 2px solid var(--accent-color-3);
+    border-radius: 5px;
+    color: var(--accent-color-3);
+    font-size: 11px;
+    font-weight: 600;
+    width: 160px;
+    padding: 5px 0 5px 0;
+    background-color: var(--bg-color-2);
+}
+
+.profile-page .profile-user-information button:hover {
+    border: 2px solid var(--accent-color-1);
+    color: var(--accent-color-2);
+    font-size: 12px;
+    padding: 4.3px 0 4.3px 0;
+    background-color: var(--bg-color-1);
+    transition: ease-in all 0.2s;
+}
+
+.profile-page .profile-user-information .user-account-information legend {
+    font-size: 18px;
+    padding: 8px 0 5px 15px;
+}
+
+.profile-page .profile-user-information .user-account-information {
+    border: 4px double rgb(106, 106, 106);
+    border-radius: 5px;
+    background: var(--bg-color-2);
+    padding: 3px 15px 3px 15px;
+    width: 80%;
+    margin-left: 90px;
+}
+
+.profile-page .profile-user-information .user-account-information .account-information-text {
+    font-size: 13px;
+}
+
+.profile-page .profile-analytics-log {
+    width: 100%;
+    height: 200px;
+    border: 4px double rgb(242, 240, 240);
+    border-radius: 5px;
+}
+
+.profile-page .analytics-section fieldset {
+    border: 4px solid rgb(106, 106, 106);
+    border-radius: 5px;
+    background: var(--bg-color-2);
+    padding: 3px 15px 3px 15px;
+    width: 100%;
+    height: 100%;
+    border-right: 2px solid rgb(106, 106, 106);
+}
+
+.profile-page .analytics-section fieldset legend {
+    font-size: 17px;
+    padding: 5px 0 0 5px;
+}
+
+.profile-page .analytics-section fieldset p {
+    font-size: 13px;
+}
+
+.profile-page .analytics-section fieldset button {
+    border: 2px solid var(--accent-color-3);
+    border-radius: 5px;
+    color: var(--accent-color-3);
+    font-size: 11px;
+    font-weight: 600;
+    width: 160px;
+    padding: 5px 0 5px 0;
+    background-color: var(--bg-color-2);
+}
+
+.profile-page .activity-log-section fieldset legend {
+    font-size: 17px;
+    padding: 5px 0 0 5px;
+}
+
+.profile-page .activity-log-section fieldset {
+    border: 4px solid rgb(106, 106, 106);
+    border-radius: 5px;
+    background: var(--bg-color-2);
+    padding: 3px 15px 3px 15px;
+    width: 100%;
+    height: 100%;
+    border-right: 2px solid rgb(106, 106, 106);
+}
+
+.profile-page .activity-log-section fieldset .activity-logs-content {
+    width: 95%;
+    height: 68%;
+    border: 2px solid rgb(242, 240, 240);
+    overflow-y: scroll;
+    border-radius: 5px;
+    padding: 5px 8px 5px 8px;
+    background: var(--border-color-1);
+}
+
+.profile-page .profile-bottom-section {
+    width: 100%;
+    height: 200px;
+}
+
+.profile-page .profile-bottom-section .profile-language-dropdown {
+    border: 2px solid var(--accent-color-3);
+    border-radius: 5px;
+    font-size: 11px;
+    width: 100px;
+    height: 25px;
+    padding: 3px 8px 3px 4px;
+    background: var(--bg-color-2);
+    color: var(--txt-color-1);
+}
+
+/* 
+    Toggle Switch Notification 
+*/
+.switch-notification {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 19px;
+    margin-left: 20px;
+} 
+/* Hide default HTML checkbox */
+.switch-notification input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+/* The slider */
+.slider-notification {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 9px;
+    background-color: #ccc;
+    transition: .4s;
+}
+.slider-notification:before {
+    position: absolute;
+    content: "";
+    height: 17px;
+    width: 26px;
+    left: 4px;
+    bottom: 0.9px;
+    border-radius: 8px;
+    background-color: white;
+    transition: .4s;
+} 
+input:checked + .slider-notification {
+    background-color: #2196F3;
+} 
+input:focus + .slider-notification {
+    box-shadow: 0 0 1px #2196F3;
+} 
+input:checked + .slider-notification:before {
+    transform: translateX(26px);
+}
+/* Rounded sliders */
+.slider-notification.round {
+    border-radius: 34px;
+} 
+.slider-notification.round:before {
+    border-radius: 50%;
+}
+/* 
+    End of Toggle Switch Notification 
+*/
+/* 
+    Toggle Switch Theme 
+*/
+.switch-theme {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 19px;
+    margin-left: 20px;
+} 
+/* Hide default HTML checkbox */
+.switch-theme input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+/* The slider */
+.slider-theme {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 9px;
+    background-color: #ccc;
+    transition: .4s;
+}
+.slider-theme:before {
+    position: absolute;
+    content: "";
+    height: 17px;
+    width: 26px;
+    left: 4px;
+    bottom: 0.9px;
+    border-radius: 8px;
+    background-color: var(--primary-color);
+    transition: .4s;
+} 
+input:checked + .slider-theme {
+    background-color: #2196F3;
+} 
+input:focus + .slider-theme {
+    box-shadow: 0 0 1px #2196F3;
+} 
+input:checked + .slider-theme:before {
+    transform: translateX(26px);
+}
+/* Rounded sliders */
+.slider-theme.round {
+    border-radius: 34px;
+} 
+.slider-theme.round:before {
+    border-radius: 50%;
+}
+/* 
+    End of Toggle Switch Theme 
+*/
+
+.profile-page .profile-bottom-section .subscription-preferences-section {
+    height: 150px;
+    border: 4px double rgb(242, 240, 240);
+    border-radius: 5px;
+    background: var(--bg-color-2);
+}
+
+.profile-page .profile-bottom-section .subscription-preferences-section legend {
+    font-size: 17px;
+    padding: 5px 0 0 5px;
+}
+
+.profile-page .profile-bottom-section .subscription-preferences-section p {
+    font-size: 13px;
+    padding-left: 25px;
+}
+
+.profile-page .profile-bottom-section .premium-feature-field button {
+    border: 2px solid var(--accent-color-3);
+    border-radius: 5px;
+    color: var(--accent-color-3);
+    font-size: 11px;
+    font-weight: 600;
+    width: 160px;
+    padding: 5px 0 5px 0;
+    margin: 0 0 8px 25px;
+    background-color: var(--bg-color-2);
+}
+
+.profile-page .profile-bottom-section .profile-logout-delete-btn button {
+    border: 2px solid var(--accent-color-3);
+    border-radius: 5px;
+    color: var(--accent-color-3);
+    font-size: 11px;
+    font-weight: 600;
+    width: 160px;
+    padding: 5px 0 5px 0;
+    margin: 0 0 8px 25px;
+    background-color: var(--bg-color-2);
+}
+
+.profile-page .profile-bottom-section .profile-logout-delete-btn button:hover {
+    border: 2px solid var(--accent-color-1);
+    color: var(--accent-color-2);
+    font-size: 12px;
+    padding: 4.3px 0 4.3px 0;
+    background-color: var(--bg-color-1);
+    transition: ease-in all 0.2s;
+}
+
+
+
+
+
+
+
+
 
 
 
