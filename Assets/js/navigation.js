@@ -23,6 +23,6 @@ navLinks.forEach(link => {
       currentPage.classList.remove('active', 'slide-out-left', 'slide-out-right');
       targetPage.classList.remove('slide-in-left', 'slide-in-right');
       targetPage.classList.add('active');
-    }, 400); // Match the CSS transition duration (0.5s)
+    }, 300); // Match the CSS transition duration (0.5s)
   });
 });

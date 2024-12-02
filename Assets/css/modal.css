@@ -1,0 +1,81 @@
+
+:root {
+    --primary-color: #2E2E2E;
+    --secondary-color: #283593;
+    --accent-color-1: #FFA726;
+    --accent-color-2: #F5F5F5;
+    --accent-color-3: #3FAFAF;
+    --border-color-1: #3FAFAF;
+    --highlight-color-1: #4169E1;
+    --bg-color-1: #4A4A4A;
+    --bg-color-2: #363636;
+    --txt-color-1: #FFFFFF;
+    --card-bg-1: #ededed;
+}
+
+
+/* Task Management */
+/* + New Task */
+.modal {
+    margin-top: 8%;  
+}
+
+.new-task-custom-modal {
+    width: 350px;
+}
+
+.new-task-custom-modal:hover {
+    box-shadow: 0 0 3px 2px var(--accent-color-2);
+    border-radius: 8px;
+}
+
+.new-task-modal .modal-btn {
+    border: 2px solid var(--bg-color-1);
+    color: var(--primary-color);
+    font-size: 11px;
+    font-weight: 600;
+    width: 150px;
+    background-color: transparent;
+    border-radius: 5px;
+    padding: 5px 0 5px 0;
+}
+
+.new-task-modal .modal-btn:hover {
+    border: 2px solid var(--accent-color-3);
+    color: var(--accent-color-3);
+    font-size: 12px;
+    padding: 4.2px 0 4.2px 0;
+    background-color: var(--bg-color-2);
+    transition: ease-in all 0.2s;
+}
+
+/* Project Management */
+/* + New Project */
+.new-project-custom-modal {
+    width: 400px;
+}
+
+.new-project-custom-modal:hover {
+    box-shadow: 0 0 3px 2px var(--accent-color-2);
+    border-radius: 8px;
+}
+
+.new-project-modal .modal-btn {
+    border: 2px solid var(--bg-color-1);
+    color: var(--primary-color);
+    font-size: 11px;
+    font-weight: 600;
+    width: 150px;
+    background-color: transparent;
+    border-radius: 5px;
+    padding: 5px 0 5px 0;
+}
+
+.new-project-modal .modal-btn:hover {
+    border: 2px solid var(--accent-color-3);
+    color: var(--accent-color-3);
+    font-size: 12px;
+    padding: 4.2px 0 4.2px 0;
+    background-color: var(--bg-color-2);
+    transition: ease-in all 0.2s;
+}
