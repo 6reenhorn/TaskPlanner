@@ -34,3 +34,16 @@ CREATE TABLE IF NOT EXISTS projects (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id_) REFERENCES users(user_id_)
 );
+
+-- CREATE TABLE IF NOT EXISTS activity_logs (
+--     activity_log_id_PK INT AUTO_INCREMENT PRIMARY KEY,
+--     administrator_id_FK INT,
+--     user_id_FK INT,
+--     reference_id_FK INT,
+--     reference_type VARCHAR(50) NOT NULL,
+--     activity_log_action VARCHAR(255) NOT NULL,
+--     activity_log_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+--     FOREIGN KEY (administrator_id_FK) REFERENCES users(user_id_),
+--     FOREIGN KEY (user_id_FK) REFERENCES users(user_id_)
+-- );
+

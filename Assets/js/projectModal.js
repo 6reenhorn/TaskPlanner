@@ -1,51 +1,87 @@
-document.getElementById('saveProjectBtn').addEventListener('click', function () {
-    // Capture the form data
-    const projectTitle = document.getElementById('projectTitle').value.trim();
-    const startDate = document.getElementById('startDate').value.trim();
-    const endDate = document.getElementById('endDate').value.trim();
-    const status = document.getElementById('status').value.trim();
-    const description = document.getElementById('projectDescription').value.trim();
-
-    // Validate the form data
-    if (!projectTitle || !startDate || !endDate || !status) {
-        alert('Please fill out all required fields.');
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Project Modal JS Loaded');
+    
+    const saveProjectBtn = document.getElementById('saveProjectBtn');
+    
+    if (!saveProjectBtn) {
+        console.error('Save Project Button not found!');
         return;
     }
-
-    // Create the project data object
-    const projectData = {
-        project_title: projectTitle,
-        project_comment: 'None',  // You can modify this if you want to include a comment
-        project_description: description,
-        project_start_date: startDate,
-        project_end_date: endDate,
-        project_status: status
-    };
-
-    // Send the project data to the server
-    fetch('http://localhost:4000/projects', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(projectData)
-    })
-    .then(response => response.text())
-    .then(data => {
-        console.log('Save response:', data);  // Debug line
-        console.log(data);  // Confirmation of successful project creation
+    
+    saveProjectBtn.addEventListener('click', function() {
+        console.log('Project save button clicked');
         
-        // After successful project creation, create and append the project card to the UI
-        const projectCard = createProjectCard(projectData);  // Assuming you have a function to create a project card
-        document.getElementById('projectContainer').appendChild(projectCard);
-        
-        // Close the modal
-        const modal = bootstrap.Modal.getInstance(document.getElementById('project-staticBackdrop'));
-        modal.hide();
+        const projectTitle = document.getElementById('projectTitle');
+        const projectDescription = document.getElementById('projectDescription');
+        const projectStartDate = document.getElementById('projectStartDate');
+        const projectEndDate = document.getElementById('projectEndDate');
+        const projectStatus = document.getElementById('projectStatus');
 
-        // Reset the form
-        document.getElementById('newProjectForm').reset();
-    })
-    .catch(err => console.error('Error saving project:', err));
+        if (!projectTitle || !projectStartDate || !projectEndDate || !projectStatus) {
+            console.error('One or more form elements not found');
+            return;
+        }
+
+        const projectData = {
+            project_title: projectTitle.value.trim(),
+            project_description: projectDescription?.value.trim() || '',
+            project_start_date: projectStartDate.value.trim(),
+            project_end_date: projectEndDate.value.trim(),
+            project_status: projectStatus.value.trim()
+        };
+
+        console.log('Sending project data:', projectData);
+
+        fetch('http://localhost:4000/projects', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(projectData)
+        })
+        .then(response => {
+            console.log('Response status:', response.status);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Project created:', data);
+            // Close the modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('project-staticBackdrop'));
+            modal.hide();
+            // Refresh the project list without full page reload
+            fetchProjects();
+            // Clear the form
+            document.getElementById('projectForm').reset();
+        })
+        .catch(err => {
+            console.error('Error saving project:', err);
+            alert('Error saving project. Please try again.');
+        });
+    });
 });
+
+// Function to fetch and display projects
+function fetchProjects() {
+    fetch('http://localhost:4000/projects')
+        .then(response => response.json())
+        .then(projects => {
+            console.log('Projects received:', projects);
+            // Update your project display logic here
+            const projectContainer = document.getElementById('projectContainer');
+            if (projectContainer) {
+                projectContainer.innerHTML = ''; // Clear existing projects
+                projects.forEach(project => {
+                    const projectCard = createProjectCard(project);
+                    projectContainer.appendChild(projectCard);
+                });
+            }
+        })
+        .catch(err => console.error('Error fetching projects:', err));
+}
+
+// Initial load of projects
+document.addEventListener('DOMContentLoaded', fetchProjects);
 
 // Function to create a project card
 function createProjectCard(project) {
@@ -102,25 +138,4 @@ document.addEventListener('click', function(e) {
         })
         .catch(err => console.error('Error deleting project:', err));
     }
-});
-
-// Load projects when the page loads
-document.addEventListener('DOMContentLoaded', function () {
-    fetch('http://localhost:4000/projects')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log('Projects received:', data);  // Debug line
-            if (Array.isArray(data)) {
-                data.forEach(project => {
-                    const projectCard = createProjectCard(project);
-                    document.getElementById('projectContainer').appendChild(projectCard);
-                });
-            }
-        })
-        .catch(err => console.error('Error fetching projects:', err));
 });
