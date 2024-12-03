@@ -2,9 +2,11 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('Project Modal JS Loaded');
     
     const saveProjectBtn = document.getElementById('saveProjectBtn');
-    
-    if (!saveProjectBtn) {
-        console.error('Save Project Button not found!');
+    const cancelProjectBtn = document.getElementById('cancelProjectBtn');
+    const addInitialTaskBtn = document.querySelector('.modal-btn'); // Assuming this is the "Add Initial Task" button
+
+    if (!saveProjectBtn || !cancelProjectBtn || !addInitialTaskBtn) {
+        console.error('One or more buttons not found!');
         return;
     }
     
@@ -13,11 +15,11 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const projectTitle = document.getElementById('projectTitle');
         const projectDescription = document.getElementById('projectDescription');
-        const projectStartDate = document.getElementById('projectStartDate');
-        const projectEndDate = document.getElementById('projectEndDate');
-        const projectStatus = document.getElementById('projectStatus');
+        const startDate = document.getElementById('startDate');
+        const endDate = document.getElementById('endDate');
+        const status = document.getElementById('status');
 
-        if (!projectTitle || !projectStartDate || !projectEndDate || !projectStatus) {
+        if (!projectTitle || !startDate || !endDate || !status) {
             console.error('One or more form elements not found');
             return;
         }
@@ -25,9 +27,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const projectData = {
             project_title: projectTitle.value.trim(),
             project_description: projectDescription?.value.trim() || '',
-            project_start_date: projectStartDate.value.trim(),
-            project_end_date: projectEndDate.value.trim(),
-            project_status: projectStatus.value.trim()
+            project_start_date: startDate.value.trim(),
+            project_end_date: endDate.value.trim(),
+            project_status: status.value.trim()
         };
 
         console.log('Sending project data:', projectData);
@@ -46,18 +48,25 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(data => {
             console.log('Project created:', data);
-            // Close the modal
             const modal = bootstrap.Modal.getInstance(document.getElementById('project-staticBackdrop'));
             modal.hide();
-            // Refresh the project list without full page reload
+            document.getElementById('newProjectForm').reset();
             fetchProjects();
-            // Clear the form
-            document.getElementById('projectForm').reset();
         })
         .catch(err => {
             console.error('Error saving project:', err);
             alert('Error saving project. Please try again.');
         });
+    });
+
+    cancelProjectBtn.addEventListener('click', function() {
+        console.log('Project cancel button clicked');
+        document.getElementById('newProjectForm').reset();
+    });
+
+    addInitialTaskBtn.addEventListener('click', function() {
+        console.log('Add Initial Task button clicked');
+        alert('Add Initial Task feature coming soon!');
     });
 });
 
@@ -67,7 +76,6 @@ function fetchProjects() {
         .then(response => response.json())
         .then(projects => {
             console.log('Projects received:', projects);
-            // Update your project display logic here
             const projectContainer = document.getElementById('projectContainer');
             if (projectContainer) {
                 projectContainer.innerHTML = ''; // Clear existing projects
@@ -80,14 +88,11 @@ function fetchProjects() {
         .catch(err => console.error('Error fetching projects:', err));
 }
 
-// Initial load of projects
-document.addEventListener('DOMContentLoaded', fetchProjects);
-
 // Function to create a project card
 function createProjectCard(project) {
     const projectCard = document.createElement('div');
     projectCard.className = 'col-4 card d-flex card-bg mb-3';
-    projectCard.dataset.projectId = project.project_id_;  // Make sure to use project_id_
+    projectCard.setAttribute('data-project-id', project.project_id_);
 
     projectCard.innerHTML = `
         <div class="card-header d-flex justify-content-between align-items-center my-0">
@@ -98,44 +103,62 @@ function createProjectCard(project) {
         </div>
         <div class="card-body">
             <ul class="card-text mt-0">
-                <li>Start Date: <span>${project.project_start_date}</span></li>
-                <li>End Date: <span>${project.project_end_date}</span></li>
+                <li>Start: <span>${project.project_start_date}</span></li>
+                <li>End: <span>${project.project_end_date}</span></li>
                 <li>Status: <span>${project.project_status}</span></li>
             </ul>
-            <div class="project-card-description mt-0">
-                <p class="project-description-text">${project.project_description}</p>
+            <div class="d-flex align-items-end mb-3">
+                <div class="col-auto project-card-description">
+                    <p class="card-description-text">${project.project_description || ''}</p>
+                </div>
             </div>
-            <div class="d-flex gap-3 mt-3 justify-content-between">
+            <div class="d-flex gap-2 justify-content-between">
                 <button type="button" class="card-btn-group project-btn-edit" onclick="alert('Edit feature coming soon!')">Edit</button>
                 <button type="button" class="card-btn-group project-btn-delete">Delete</button>
                 <button type="button" class="card-btn-group project-btn-comment" onclick="alert('Comment feature coming soon!')">Comment</button>
-                <button type="button" class="card-btn-group project-btn-view-details" onclick="alert('View Details feature coming soon!')">View Details</button>
+                <button type="button" class="card-btn-group project-btn-view" onclick="alert('View Details feature coming soon!')">View Details</button>
             </div>
         </div>
     `;
+
     return projectCard;
 }
 
-// Add this to your existing JavaScript where you handle the delete button clicks
+// Initial load of projects
+document.addEventListener('DOMContentLoaded', fetchProjects);
+
+// Update the event listener to use project-specific class
 document.addEventListener('click', function(e) {
     if (e.target.classList.contains('project-btn-delete')) {
         const projectCard = e.target.closest('.card');
-        const projectId = projectCard.dataset.projectId;  // Retrieve the project ID
+        const projectId = projectCard.getAttribute('data-project-id');
+        console.log('Delete button clicked for project ID:', projectId);
 
         if (!projectId) {
-            console.error('Project ID is undefined');
+            console.error('No project ID found on card');
+            alert('Error: Could not identify project to delete');
             return;
         }
 
-        fetch(`http://localhost:4000/projects/${projectId}`, {
-            method: 'DELETE'
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Failed to delete project');
-            }
-            projectCard.remove();
-        })
-        .catch(err => console.error('Error deleting project:', err));
+        if (confirm('Are you sure you want to delete this project?')) {
+            fetch(`http://localhost:4000/projects/${projectId}`, {
+                method: 'DELETE'
+            })
+            .then(response => {
+                console.log('Delete response status:', response.status);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Delete successful:', data);
+                projectCard.remove();
+            })
+            .catch(err => {
+                console.error('Error deleting project:', err);
+                alert(`Error deleting project: ${err.message}`);
+            });
+        }
     }
 });

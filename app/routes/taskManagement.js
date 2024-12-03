@@ -16,22 +16,19 @@ router.get('/', async (req, res) => {
 // POST new task
 router.post('/', async (req, res) => {
     try {
-        console.log('Received task data:', req.body); // Log incoming data
         const { task_title, task_description, task_due_date, task_status, task_priority } = req.body;
+        console.log('Creating new task:', { 
+            title: task_title,
+            due_date: task_due_date,
+            status: task_status,
+            priority: task_priority
+        });
 
-        if (!task_title || !task_due_date || !task_status || !task_priority) {
-            console.log('Missing required fields:', { task_title, task_due_date, task_status, task_priority });
-            return res.status(400).json({ error: 'Missing required fields' });
-        }
-
-        console.log('Executing SQL query with values:', [task_title, task_description, task_due_date, task_status, task_priority]);
-        
         const [result] = await db.execute(
             'INSERT INTO tasks (task_title, task_description, task_due_date, task_status, task_priority) VALUES (?, ?, ?, ?, ?)',
             [task_title, task_description, task_due_date, task_status, task_priority]
         );
-        
-        console.log('Task created successfully:', result);
+        console.log('Task created successfully with ID:', result.insertId);
         res.status(201).json({ message: 'Task created!', taskId: result.insertId });
     } catch (err) {
         console.error('Error creating task:', err);
