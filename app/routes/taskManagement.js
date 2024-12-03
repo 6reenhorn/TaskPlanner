@@ -37,4 +37,20 @@ router.post('/', async (req, res) => {
     }
 });
 
+// Add delete route
+router.delete('/:id', async (req, res) => {
+    try {
+        console.log('Deleting task:', req.params.id);
+        const [result] = await db.query('DELETE FROM tasks WHERE id = ?', [req.params.id]);
+        console.log('Delete result:', result);  // Log the result of the query
+        if (result.affectedRows === 0) {
+            return res.status(404).send('Task not found');
+        }
+        res.status(200).send('Task deleted');
+    } catch (err) {
+        console.error('Error deleting task:', err);
+        res.status(500).send(err.message);
+    }
+});
+
 module.exports = router;

@@ -70,6 +70,8 @@ document.addEventListener('DOMContentLoaded', function () {
 function createTaskCard(task) {
     const taskCard = document.createElement('div');
     taskCard.className = 'col-4 card d-flex card-bg mb-3';
+    taskCard.dataset.taskId = task.id;  // Set the data-task-id attribute
+
     taskCard.innerHTML = `
         <div class="card-header d-flex justify-content-between align-items-center my-0">
             ${task.task_title}
@@ -84,9 +86,9 @@ function createTaskCard(task) {
                 <li>Priority: <span>${task.task_priority.charAt(0).toUpperCase() + task.task_priority.slice(1)}</span></li>
             </ul>
             <div class="card-btn-group d-flex gap-2">
-                <button type="button" class="card-btn-group task-btn-edit">Edit</button>
-                <button type="button" class="card-btn-group task-btn-delete">Delete</button>
-                <button type="button" class="card-btn-group task-btn-comment">Comment</button>
+                <button type="button" class="card-btn-group task-btn-edit" onclick="alert('Edit feature coming soon!')">Edit</button>
+                <button type="button" class="card-btn-group task-btn-delete" onclick="this.closest('.col-4').remove()">Delete</button>
+                <button type="button" class="card-btn-group task-btn-comment" onclick="alert('Comment feature coming soon!')">Comment</button>
             </div>
             <div class="d-flex align-items-end gap-5">
                 <div class="col-auto task-card-description">
@@ -100,3 +102,27 @@ function createTaskCard(task) {
     `;
     return taskCard;
 }
+
+// Add this to your existing JavaScript where you handle the delete button clicks
+document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('task-btn-delete')) {
+        const taskCard = e.target.closest('.card');
+        const taskId = taskCard.dataset.taskId;  // Retrieve the task ID
+
+        if (!taskId) {
+            console.error('Task ID is undefined');
+            return;
+        }
+
+        fetch(`http://localhost:4000/tasks/${taskId}`, {
+            method: 'DELETE'
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to delete task');
+            }
+            taskCard.remove();
+        })
+        .catch(err => console.error('Error deleting task:', err));
+    }
+});
