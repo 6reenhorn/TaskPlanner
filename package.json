@@ -1,7 +1,7 @@
 {
   "name": "bootstrap-npm",
   "version": "1.0.0",
-  "description": "",
+  "description": "A web-based task planner designed specifically for students seeking effective assistance in organizing and managing their workflow.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -9,6 +9,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "bootstrap": "^5.3.3"
-  }
+    "bootstrap": "^5.3.3",
+    "cors": "^2.8.5",
+    "express": "^4.21.1",
+    "mysql2": "^3.11.5"
+  },
+  "keywords": []
 }

@@ -1,0 +1,20 @@
+{
+    "sqltools.connections": [
+        {
+            "mysqlOptions": {
+                "authProtocol": "default",
+                "enableSsl": "Disabled"
+            },
+            "previewLimit": 50,
+            "server": "localhost",
+            "port": 3306,
+            "driver": "MySQL",
+            "name": "Mysql Local",
+            "username": "root",
+            "password": "null2504",
+            "connectionTimeout": 30,
+            "database": "taskplanner"
+        }
+    ],
+    "liveServer.settings.port": 5501
+}
