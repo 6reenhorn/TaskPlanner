@@ -15,7 +15,7 @@ const pool = mysql.createPool({
 module.exports = pool;
 
 app.use(cors({
-    origin: 'http://127.0.0.1:5501',
+    origin: 'http://127.0.0.1:5502',
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type']
 }));

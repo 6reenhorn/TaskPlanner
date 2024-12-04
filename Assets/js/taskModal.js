@@ -13,22 +13,23 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM Content Loaded'); // Debug log
     
     const saveTaskBtn = document.getElementById('saveTaskBtn');
-    console.log('Save Task Button found:', saveTaskBtn); // Debug log
+    const cancelTaskBtn = document.getElementById('cancelTaskBtn');
     
-    if (!saveTaskBtn) {
-        console.error('Save Task Button not found!');
+    if (!saveTaskBtn || !cancelTaskBtn) {
+        console.error('Save or Cancel Task Button not found!');
         return;
     }
     
+    // Save task functionality
     saveTaskBtn.addEventListener('click', function() {
-        console.log('Task save button clicked'); // Debug log
+        console.log('Task save button clicked');
         
         const taskTitle = document.getElementById('taskTitle');
         const taskDescription = document.getElementById('description');
         const taskDueDate = document.getElementById('dueDate');
         const taskPriority = document.getElementById('priority');
 
-        console.log('Form elements:', { // Debug log
+        console.log('Form elements:', {
             taskTitle: taskTitle?.value,
             taskDescription: taskDescription?.value,
             taskDueDate: taskDueDate?.value,
@@ -48,7 +49,7 @@ document.addEventListener('DOMContentLoaded', function() {
             task_priority: taskPriority.value.trim()
         };
 
-        console.log('Sending task data:', taskData); // Debug log
+        console.log('Sending task data:', taskData);
 
         fetch('http://localhost:4000/tasks', {
             method: 'POST',
@@ -56,7 +57,7 @@ document.addEventListener('DOMContentLoaded', function() {
             body: JSON.stringify(taskData)
         })
         .then(response => {
-            console.log('Response status:', response.status); // Debug log
+            console.log('Response status:', response.status);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
@@ -64,10 +65,8 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(data => {
             console.log('Task created:', data);
-            // Close the modal
             const modal = bootstrap.Modal.getInstance(document.getElementById('task-staticBackdrop'));
             modal.hide();
-            // Refresh the task list without full page reload
             fetchTasks();
         })
         .catch(err => {
@@ -75,6 +74,9 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('Error saving task. Please try again.');
         });
     });
+
+    // Cancel button uses Bootstrap's data-bs-dismiss="modal"
+    // No additional JavaScript needed for cancel
 });
 
 // Function to fetch and display tasks

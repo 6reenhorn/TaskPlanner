@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     const saveProjectBtn = document.getElementById('saveProjectBtn');
     const cancelProjectBtn = document.getElementById('cancelProjectBtn');
-    const addInitialTaskBtn = document.querySelector('.modal-btn'); // Assuming this is the "Add Initial Task" button
+    const addInitialTaskBtn = document.querySelector('#newProjectForm .add-initial-task-btn');
 
     if (!saveProjectBtn || !cancelProjectBtn || !addInitialTaskBtn) {
         console.error('One or more buttons not found!');
@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     addInitialTaskBtn.addEventListener('click', function() {
-        console.log('Add Initial Task button clicked');
+        console.log('Add Initial Task button clicked in project modal');
         alert('Add Initial Task feature coming soon!');
     });
 });
