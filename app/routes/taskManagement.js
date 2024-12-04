@@ -1,11 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../db/server');
+const db = require('../db');
 
-// GET tasks
+// GET all tasks
 router.get('/', async (req, res) => {
     try {
-        const [tasks] = await db.query('SELECT * FROM tasks ORDER BY task_id_ DESC');
+        console.log('Fetching tasks');
+        const [tasks] = await db.execute('SELECT * FROM tasks ORDER BY created_at DESC');
+        console.log('Found tasks:', tasks);
         res.json(tasks);
     } catch (err) {
         console.error('Error fetching tasks:', err);
@@ -16,23 +18,29 @@ router.get('/', async (req, res) => {
 // POST new task
 router.post('/', async (req, res) => {
     try {
-        const { task_title, task_description, task_due_date, task_status, task_priority } = req.body;
-        console.log('Creating new task:', { 
-            title: task_title,
-            due_date: task_due_date,
-            status: task_status,
-            priority: task_priority
-        });
+        console.log('Received task data:', req.body);
+
+        const { task_title, task_description, task_due_date, task_priority, user_id_ } = req.body;
+        
+        if (!user_id_) {
+            throw new Error('User ID is required');
+        }
 
         const [result] = await db.execute(
-            'INSERT INTO tasks (task_title, task_description, task_due_date, task_status, task_priority) VALUES (?, ?, ?, ?, ?)',
-            [task_title, task_description, task_due_date, task_status, task_priority]
+            'INSERT INTO tasks (task_title, task_description, task_due_date, task_priority, user_id_) VALUES (?, ?, ?, ?, ?)',
+            [task_title, task_description, task_due_date, task_priority, user_id_]
         );
-        console.log('Task created successfully with ID:', result.insertId);
-        res.status(201).json({ message: 'Task created!', taskId: result.insertId });
+
+        console.log('Database result:', result);
+
+        res.status(201).json({
+            message: 'Task created successfully',
+            taskId: result.insertId
+        });
+
     } catch (err) {
-        console.error('Error creating task:', err);
-        res.status(500).json({ error: err.message });
+        console.error('Detailed error:', err);
+        res.status(500).json({ error: err.message, stack: err.stack });
     }
 });
 
@@ -40,23 +48,18 @@ router.post('/', async (req, res) => {
 router.delete('/:id', async (req, res) => {
     try {
         const taskId = req.params.id;
-        console.log('Deleting task with ID:', taskId); // Debug log
+        console.log('Deleting task with ID:', taskId);
 
-        const [result] = await db.execute(
-            'DELETE FROM tasks WHERE task_id_ = ?',
-            [taskId]
-        );
+        const [result] = await db.execute('DELETE FROM tasks WHERE task_id_ = ?', [taskId]);
 
         if (result.affectedRows === 0) {
-            console.log('No task found with ID:', taskId);
             return res.status(404).json({ error: 'Task not found' });
         }
 
-        console.log('Task deleted successfully:', result);
-        res.json({ message: 'Task deleted successfully' });
+        res.status(200).json({ message: 'Task deleted successfully' });
     } catch (err) {
         console.error('Error deleting task:', err);
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ error: 'Failed to delete task' });
     }
 });
 

@@ -1,3 +1,5 @@
+const BASE_URL = 'http://localhost:4000/api';
+
 fetch('http://localhost:4000/tasks')
     .then(response => response.json())
     .then(tasks => {
@@ -21,58 +23,49 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Save task functionality
-    saveTaskBtn.addEventListener('click', function() {
-        console.log('Task save button clicked');
-        
-        const taskTitle = document.getElementById('taskTitle');
-        const taskDescription = document.getElementById('description');
-        const taskDueDate = document.getElementById('dueDate');
-        const taskPriority = document.getElementById('priority');
+    saveTaskBtn.addEventListener('click', async function() {
+        try {
+            const user = JSON.parse(sessionStorage.getItem('user'));
+            console.log('User data:', user);
 
-        console.log('Form elements:', {
-            taskTitle: taskTitle?.value,
-            taskDescription: taskDescription?.value,
-            taskDueDate: taskDueDate?.value,
-            taskPriority: taskPriority?.value
-        });
+            const taskData = {
+                task_title: document.getElementById('taskTitle').value,
+                task_description: document.getElementById('description').value,
+                task_due_date: document.getElementById('dueDate').value,
+                task_priority: document.getElementById('priority').value,
+                user_id_: user.id
+            };
+            console.log('Sending task data:', taskData);
 
-        if (!taskTitle || !taskDueDate || !taskPriority) {
-            console.error('One or more form elements not found');
-            return;
-        }
+            const response = await fetch('http://localhost:4000/api/tasks', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify(taskData)
+            });
 
-        const taskData = {
-            task_title: taskTitle.value.trim(),
-            task_description: taskDescription?.value.trim() || '',
-            task_due_date: taskDueDate.value.trim(),
-            task_status: 'pending',
-            task_priority: taskPriority.value.trim()
-        };
-
-        console.log('Sending task data:', taskData);
-
-        fetch('http://localhost:4000/tasks', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(taskData)
-        })
-        .then(response => {
-            console.log('Response status:', response.status);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            return response.json();
-        })
-        .then(data => {
-            console.log('Task created:', data);
+
+            const result = await response.json();
+            console.log('Server response:', result);
+
+            // Success handling
             const modal = bootstrap.Modal.getInstance(document.getElementById('task-staticBackdrop'));
             modal.hide();
-            fetchTasks();
-        })
-        .catch(err => {
-            console.error('Error saving task:', err);
-            alert('Error saving task. Please try again.');
-        });
+            document.getElementById('newTaskForm').reset();
+
+            // Fetch and display tasks after saving
+            await fetchAndDisplayTasks();
+
+        } catch (error) {
+            console.error('Detailed error:', error);
+            alert('Error saving task: ' + error.message);
+        }
     });
 
     // Cancel button uses Bootstrap's data-bs-dismiss="modal"
@@ -80,55 +73,45 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Function to fetch and display tasks
-function fetchTasks() {
-    fetch('http://localhost:4000/tasks')
-        .then(response => response.json())
-        .then(tasks => {
-            console.log('Tasks received:', tasks);
-            // Update your task display logic here
-            const taskContainer = document.getElementById('taskContainer');
-            if (taskContainer) {
-                taskContainer.innerHTML = ''; // Clear existing tasks
-                tasks.forEach(task => {
-                    const taskCard = createTaskCard(task);
-                    taskContainer.appendChild(taskCard);
-                });
-            }
-        })
-        .catch(err => console.error('Error fetching tasks:', err));
+async function fetchAndDisplayTasks() {
+    try {
+        const response = await fetch('http://localhost:4000/api/tasks');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const tasks = await response.json();
+        console.log('Fetched tasks:', tasks);
+
+        // Update main task container
+        const taskContainer = document.getElementById('taskContainer');
+        taskContainer.innerHTML = ''; // Clear existing tasks
+
+        // Create and append task cards
+        tasks.forEach(task => {
+            const taskCard = createTaskCard(task);
+            taskContainer.appendChild(taskCard);
+        });
+
+        // Update upcoming tasks
+        updateUpcomingTasks(tasks);
+
+    } catch (error) {
+        console.error('Error fetching and displaying tasks:', error);
+    }
 }
 
-document.addEventListener('DOMContentLoaded', function () {
-    fetch('http://localhost:4000/tasks')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log('Tasks received:', data);
-            if (Array.isArray(data)) {
-                // Update task cards
-                data.forEach(task => {
-                    console.log('All tasks:', data); // See what data we're getting
-                    console.log('Individual task:', task); // Check each task's structure
-                    const taskCard = createTaskCard(task);
-                    document.getElementById('taskContainer').appendChild(taskCard);
-                });
-                // Update upcoming tasks
-                updateUpcomingTasks(data);
-            }
-        })
-        .catch(err => console.error('Error fetching tasks:', err));
-});
+// Call this function when the page loads
+document.addEventListener('DOMContentLoaded', fetchAndDisplayTasks);
 
 // Function to create a task card
 function createTaskCard(task) {
     const taskCard = document.createElement('div');
     taskCard.className = 'col-4 card d-flex card-bg mb-3';
     taskCard.setAttribute('data-task-id', task.task_id_);
-    console.log('Creating card with task ID:', task.task_id_); // Debug log
+    console.log('Creating card with task ID:', task.task_id_);
+
+    // Format the date to be more readable
+    const dueDate = new Date(task.task_due_date).toLocaleDateString();
 
     taskCard.innerHTML = `
         <div class="card-header d-flex justify-content-between align-items-center my-0">
@@ -139,7 +122,7 @@ function createTaskCard(task) {
         </div>
         <div class="card-body">
             <ul class="card-text mt-0">
-                <li>Due: <span>${task.task_due_date}</span></li>
+                <li>Due: <span>${dueDate}</span></li>
                 <li>Status: <span>${task.task_status}</span></li>
                 <li>Priority: <span>${task.task_priority}</span></li>
             </ul>
@@ -162,39 +145,57 @@ function createTaskCard(task) {
     return taskCard;
 }
 
-// Add event listeners for delete buttons
-document.addEventListener('click', function(e) {
-    if (e.target.classList.contains('task-btn-delete')) {
-        const taskCard = e.target.closest('.card');
+// Fetch tasks and update UI
+async function fetchTasks() {
+    try {
+        const response = await fetch(`${BASE_URL}/tasks`);
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const tasks = await response.json();
+        console.log('Fetched tasks:', tasks);
+
+        // Clear existing tasks
+        const taskContainer = document.getElementById('taskContainer');
+        taskContainer.innerHTML = '';
+
+        // Create task cards
+        tasks.forEach(task => createTaskCard(task));
+
+    } catch (error) {
+        console.error('Error fetching tasks:', error);
+    }
+}
+
+// Function to delete a task
+async function deleteTask(taskId) {
+    try {
+        const response = await fetch(`http://localhost:4000/api/tasks/${taskId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        console.log('Task deleted successfully');
+        await fetchAndDisplayTasks(); // This will update both main tasks and upcoming tasks
+    } catch (error) {
+        console.error('Error deleting task:', error);
+    }
+}
+
+// Add event listener to delete buttons
+document.addEventListener('click', function(event) {
+    if (event.target.classList.contains('task-btn-delete')) {
+        const taskCard = event.target.closest('.card');
         const taskId = taskCard.getAttribute('data-task-id');
-        console.log('Delete button clicked for task ID:', taskId); // Debug log
-
-        if (!taskId) {
-            console.error('No task ID found on card');
-            alert('Error: Could not identify task to delete');
-            return;
-        }
-
-        if (confirm('Are you sure you want to delete this task?')) {
-            fetch(`http://localhost:4000/tasks/${taskId}`, {
-                method: 'DELETE'
-            })
-            .then(response => {
-                console.log('Delete response status:', response.status); // Debug log
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('Delete successful:', data);
-                taskCard.remove();
-            })
-            .catch(err => {
-                console.error('Error deleting task:', err);
-                alert(`Error deleting task: ${err.message}`);
-            });
-        }
+        deleteTask(taskId);
     }
 });
 
@@ -377,7 +378,7 @@ function addTask(taskData) {
 
 function fetchRecentActivities() {
     console.log('Fetching activities...');
-    fetch('http://localhost:4000/activities')
+    fetch(`${BASE_URL}/activities`)
         .then(response => {
             console.log('Response status:', response.status);
             return response.json();

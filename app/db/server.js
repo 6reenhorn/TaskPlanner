@@ -1,32 +1,38 @@
 const express = require('express');
-const app = express();
 const cors = require('cors');
-const mysql = require('mysql2/promise');
+const db = require('../db');  // Correct path to point to db.js in the app folder
+const taskRoutes = require('../routes/taskManagement');
+const projectRoutes = require('../routes/projectManagement');
 
-// Create MySQL connection pool
-const pool = mysql.createPool({
-    host: 'localhost',
-    user: 'root',
-    password: 'null2504',
-    database: 'taskplanner'
-});
-
-// Export pool before setting up routes
-module.exports = pool;
+const app = express();
 
 app.use(cors({
     origin: 'http://127.0.0.1:5503',
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type']
+    credentials: true
 }));
 
 app.use(express.json());
 
-// Mount routes
-app.use('/tasks', require('../routes/taskManagement'));
-app.use('/projects', require('../routes/projectManagement'));
+// Test route
+app.get('/test', (req, res) => {
+    res.json({ message: 'Server is working' });
+});
 
-const PORT = 4000;
-app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+// Debug route to check tasks
+app.get('/debug/tasks', async (req, res) => {
+    try {
+        const [tasks] = await db.execute('SELECT * FROM tasks');
+        res.json(tasks);
+    } catch (err) {
+        console.error('Debug route error:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.use('/api/tasks', taskRoutes);
+app.use('/api/projects', projectRoutes);
+
+app.listen(4000, () => {
+    console.log('Server running on http://localhost:4000');
+    console.log('Ready to receive requests...');
 });

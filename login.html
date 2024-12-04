@@ -8,12 +8,12 @@
     <link rel="stylesheet" href="Assets/css/login.css">
 </head>
 <body>
-    <div class="auth-container" id="authContainer">
-        <div class="auth-forms">
-            <!-- Login Form -->
-            <div class="login-form" id="loginForm">
+    <div class="auth-container">
+        <div class="auth-panel">
+            <!-- Login Section -->
+            <div class="auth-section login-section" id="loginSection">
                 <h2>Login</h2>
-                <form>
+                <form id="loginForm">
                     <div class="form-group">
                         <input type="email" id="loginEmail" placeholder="Email" required>
                     </div>
@@ -22,15 +22,28 @@
                     </div>
                     <button type="submit" class="auth-btn">Login</button>
                 </form>
+                <div class="social-login">
+                    <img src="./Assets/img/facebook-icon.png" alt="Facebook">
+                    <img src="./Assets/img/Instagram-icon.png" alt="Instagram">
+                    <img src="./Assets/img/google-icon.png" alt="Google">
+                </div>
                 <p>Don't have an account? <a href="#" id="showSignup">Sign Up</a></p>
             </div>
 
-            <!-- Signup Form -->
-            <div class="signup-form" id="signupForm">
-                <h2>Create Account</h2>
-                <form>
+            <!-- Signup Section -->
+            <div class="auth-section signup-section" id="signupSection">
+                <h2>Sign Up</h2>
+                <div class="social-login">
+                    <img src="./Assets/img/facebook-icon.png" alt="Facebook">
+                    <img src="./Assets/img/Instagram-icon.png" alt="Instagram">
+                    <img src="./Assets/img/google-icon.png" alt="Google">
+                </div>
+                <form id="signupForm">
                     <div class="form-group">
                         <input type="text" id="signupUsername" placeholder="Username" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" id="signupFullName" placeholder="Full Name" required>
                     </div>
                     <div class="form-group">
                         <input type="email" id="signupEmail" placeholder="Email" required>

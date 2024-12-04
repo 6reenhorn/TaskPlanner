@@ -2,6 +2,7 @@ CREATE TABLE IF NOT EXISTS users (
     user_id_ INT AUTO_INCREMENT PRIMARY KEY,
     first_name VARCHAR(255) NOT NULL,
     last_name VARCHAR(255) NOT NULL,
+    username VARCHAR(255) NOT NULL,
     user_email VARCHAR(255) NOT NULL,
     user_password VARCHAR(255) NOT NULL,
     user_role VARCHAR(50) NOT NULL,
@@ -12,6 +13,7 @@ CREATE TABLE IF NOT EXISTS users (
 
 CREATE TABLE IF NOT EXISTS tasks (
     task_id_ INT AUTO_INCREMENT PRIMARY KEY,
+    user_id_ INT,
     task_title VARCHAR(255) NOT NULL,
     task_comment TEXT,
     task_description TEXT,
