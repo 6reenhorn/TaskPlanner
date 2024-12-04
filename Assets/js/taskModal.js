@@ -198,7 +198,7 @@ document.addEventListener('click', function(e) {
     }
 });
 
-// Add this function to filter and display upcoming tasks
+// Function to filter and display today's tasks
 function updateUpcomingTasks(tasks) {
     const upcomingTasksContainer = document.querySelector('.upcoming-task .row.my-1');
     
@@ -212,19 +212,23 @@ function updateUpcomingTasks(tasks) {
     
     upcomingTasksContainer.innerHTML = '';
 
+    // Get today's date (start and end)
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
 
-    let visibleIndex = 0; // Counter for visible tasks only
+    let visibleIndex = 0;
 
     tasks.forEach(task => {
         const taskDueDate = new Date(task.task_due_date);
         taskDueDate.setHours(0, 0, 0, 0);
 
-        if (taskDueDate >= today) {
+        // Check if task is due today
+        if (taskDueDate.getTime() === today.getTime()) {
             const taskRow = createTaskRow(task, visibleIndex);
             upcomingTasksContainer.appendChild(taskRow);
-            visibleIndex++; // Increment only when a task is actually displayed
+            visibleIndex++;
         }
     });
 }
@@ -240,18 +244,26 @@ function createTaskRow(task, visibleIndex) {
 
     function updateRemainingTime() {
         const now = new Date();
-        const dueDate = new Date(task.task_due_date);
-        const diffTime = dueDate - now;
+        const createdAt = new Date(task.created_at);
+        // Set end time to 24 hours after creation
+        const endTime = new Date(createdAt.getTime() + (24 * 60 * 60 * 1000));
+        const diffTime = endTime - now;
         
         if (diffTime <= 0) {
-            return 'Past due';
+            return 'Time expired';
         }
 
         const hours = Math.floor(diffTime / (1000 * 60 * 60));
         const minutes = Math.floor((diffTime % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((diffTime % (1000 * 60)) / 1000);
 
-        return `${hours}h ${minutes}m ${seconds}s`;
+        // Also show how long ago the task was created
+        const timeSinceCreation = Math.floor((now - createdAt) / (1000 * 60)); // minutes
+        const creationInfo = timeSinceCreation < 60 
+            ? `Created ${timeSinceCreation}m ago` 
+            : `Created ${Math.floor(timeSinceCreation / 60)}h ${timeSinceCreation % 60}m ago`;
+
+        return `${creationInfo} | ${hours}h ${minutes}m ${seconds}s remaining`;
     }
 
     taskRow.innerHTML = `
