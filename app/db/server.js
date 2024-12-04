@@ -3,6 +3,7 @@ const cors = require('cors');
 const db = require('../db');  // Correct path to point to db.js in the app folder
 const taskRoutes = require('../routes/taskManagement');
 const projectRoutes = require('../routes/projectManagement');
+const authRoutes = require('../routes/authManagement');
 
 const app = express();
 
@@ -31,6 +32,7 @@ app.get('/debug/tasks', async (req, res) => {
 
 app.use('/api/tasks', taskRoutes);
 app.use('/api/projects', projectRoutes);
+app.use('/api/auth', authRoutes);
 
 app.listen(4000, () => {
     console.log('Server running on http://localhost:4000');

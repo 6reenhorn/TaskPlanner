@@ -1,78 +1,64 @@
 const express = require('express');
 const router = express.Router();
-const bcrypt = require('bcrypt');
 const db = require('../db');
+const bcrypt = require('bcrypt');
 
-// Login route
+// Add a test GET route to verify the endpoint is working
+router.get('/test', (req, res) => {
+    res.json({ message: 'Auth routes are working' });
+});
+
+// Your existing POST login route
 router.post('/login', async (req, res) => {
     try {
-        const { email, password } = req.body;
+        console.log('Received login request:', req.body);
+        const { username, password } = req.body;
         
+        if (!username || !password) {
+            return res.status(400).json({ error: 'Email and password are required' });
+        }
+
+        console.log('Attempting login for user:', username);
+
+        // First, find user by email only
         const [users] = await db.execute(
             'SELECT * FROM users WHERE user_email = ?',
-            [email]
+            [username]
         );
 
+        console.log('Query result:', users);
+
         if (users.length === 0) {
-            return res.status(401).json({ error: 'Invalid email or password' });
+            console.log('No user found with this email');
+            return res.status(401).json({ error: 'Invalid credentials' });
         }
 
         const user = users[0];
-        const validPassword = await bcrypt.compare(password, user.user_password);
-
-        if (!validPassword) {
-            return res.status(401).json({ error: 'Invalid email or password' });
+        
+        // Compare the password hash
+        const passwordMatch = await bcrypt.compare(password, user.user_password);
+        
+        if (!passwordMatch) {
+            console.log('Password does not match');
+            return res.status(401).json({ error: 'Invalid credentials' });
         }
 
-        // Create session or token here
+        console.log('Login successful for user:', username);
+        
         res.json({ 
             message: 'Login successful',
             user: {
                 id: user.user_id_,
+                firstName: user.first_name,
+                lastName: user.last_name,
                 username: user.username,
-                email: user.user_email
+                email: user.user_email,
+                role: user.user_role
             }
         });
     } catch (err) {
         console.error('Login error:', err);
-        res.status(500).json({ error: 'Server error' });
-    }
-});
-
-// Register route
-router.post('/register', async (req, res) => {
-    try {
-        const { firstName, lastName, username, email, password } = req.body;
-        console.log('Received registration request:', { firstName, lastName, username, email });
-        
-        // Check if user already exists
-        const [existingUsers] = await db.execute(
-            'SELECT * FROM users WHERE user_email = ? OR username = ?',
-            [email, username]
-        );
-        console.log('Existing users check:', existingUsers);
-
-        if (existingUsers.length > 0) {
-            return res.status(400).json({ error: 'Email or username already exists' });
-        }
-
-        // Hash password
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        // Insert new user
-        const [result] = await db.execute(
-            'INSERT INTO users (first_name, last_name, username, user_email, user_password, user_role) VALUES (?, ?, ?, ?, ?, ?)',
-            [firstName, lastName, username, email, hashedPassword, 'user']
-        );
-        console.log('Insert result:', result);
-
-        res.status(201).json({ 
-            message: 'Registration successful',
-            userId: result.insertId
-        });
-    } catch (err) {
-        console.error('Registration error:', err);
-        res.status(500).json({ error: 'Server error' });
+        res.status(500).json({ error: 'Login failed' });
     }
 });
 
