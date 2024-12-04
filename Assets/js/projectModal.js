@@ -81,6 +81,18 @@ async function fetchAndDisplayProjects() {
         const projects = await response.json();
         console.log('Fetched projects:', projects);
 
+        // Log each project individually
+        projects.forEach(project => {
+            console.log('Project details:', {
+                id: project.project_id_,
+                title: project.project_title,
+                description: project.project_description,
+                startDate: project.project_start_date,
+                endDate: project.project_end_date,
+                status: project.project_status
+            });
+        });
+
         // Get the container where projects should be displayed
         const projectContainer = document.getElementById('projectContainer');
         if (!projectContainer) {
@@ -143,7 +155,7 @@ function createProjectCard(project) {
 // Make sure to call fetchAndDisplayProjects when the page loads
 document.addEventListener('DOMContentLoaded', fetchAndDisplayProjects);
 
-// Update the event listener to use project-specific class
+// Update the event listener to use the correct API endpoint
 document.addEventListener('click', function(e) {
     if (e.target.classList.contains('project-btn-delete')) {
         const projectCard = e.target.closest('.card');
@@ -157,24 +169,7 @@ document.addEventListener('click', function(e) {
         }
 
         if (confirm('Are you sure you want to delete this project?')) {
-            fetch(`http://localhost:4000/projects/${projectId}`, {
-                method: 'DELETE'
-            })
-            .then(response => {
-                console.log('Delete response status:', response.status);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('Delete successful:', data);
-                projectCard.remove();
-            })
-            .catch(err => {
-                console.error('Error deleting project:', err);
-                alert(`Error deleting project: ${err.message}`);
-            });
+            deleteProject(projectId);  // Use the existing deleteProject function
         }
     }
 });
@@ -210,3 +205,30 @@ document.getElementById('addProjectForm').addEventListener('submit', async funct
         console.error('Error:', error);
     }
 });
+
+// Assuming you have a function to handle delete button clicks
+async function deleteProject(projectId) {
+    try {
+        console.log('Delete button clicked for project ID:', projectId);
+
+        const response = await fetch(`http://localhost:4000/api/projects/${projectId}`, {
+            method: 'DELETE',
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+
+        console.log('Delete response status:', response.status);
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        console.log('Project deleted successfully');
+        // Refresh the project list
+        await fetchAndDisplayProjects();
+    } catch (error) {
+        console.error('Error deleting project:', error);
+        alert('Error deleting project. Please try again.');
+    }
+}

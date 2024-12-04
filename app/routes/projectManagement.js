@@ -48,11 +48,36 @@ router.post('/', async (req, res) => {
 
 router.get('/', async (req, res) => {
     try {
-        const [projects] = await db.execute('SELECT * FROM projects ORDER BY created_at DESC');
+        console.log('Fetching projects');
+        const [projects] = await db.execute('SELECT * FROM projects');
+        console.log('Found projects:', projects);
+
         res.json(projects);
     } catch (err) {
         console.error('Error fetching projects:', err);
         res.status(500).json({ error: 'Failed to fetch projects' });
+    }
+});
+
+router.delete('/:id', async (req, res) => {
+    try {
+        const projectId = req.params.id;
+        console.log('Deleting project with ID:', projectId);
+
+        const [result] = await db.execute(
+            'DELETE FROM projects WHERE project_id_ = ?',
+            [projectId]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Project not found' });
+        }
+
+        console.log('Project deleted successfully');
+        res.status(200).json({ message: 'Project deleted successfully' });
+    } catch (err) {
+        console.error('Error deleting project:', err);
+        res.status(500).json({ error: 'Failed to delete project' });
     }
 });
 
