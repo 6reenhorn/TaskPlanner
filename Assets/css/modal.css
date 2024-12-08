@@ -162,7 +162,7 @@
 }
 
 .task-added-container {
-    height: 100px; /* Adjust this value as needed */
+    height: 85px; /* Adjust this value as needed */
     overflow-y: auto;
     padding: 10px;
     border: 1px solid #dee2e6;

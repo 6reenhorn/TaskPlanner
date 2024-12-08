@@ -78,4 +78,31 @@ router.delete('/:id', async (req, res) => {
     }
 });
 
+// Add this route to handle project-task associations
+router.post('/:projectId/tasks/:taskId', async (req, res) => {
+    try {
+        const { projectId, taskId } = req.params;
+        console.log(`Creating association between project ${projectId} and task ${taskId}`);
+
+        const [result] = await db.execute(
+            'INSERT INTO project_task_assignment (project_id_, task_id_, task_assigned_at) VALUES (?, ?, NOW())',
+            [projectId, taskId]
+        );
+
+        res.json({ 
+            success: true, 
+            message: 'Task assigned to project successfully',
+            assignment_id: result.insertId 
+        });
+
+    } catch (error) {
+        console.error('Error creating project-task association:', error);
+        res.status(500).json({ 
+            success: false, 
+            error: 'Failed to assign task to project',
+            details: error.message 
+        });
+    }
+});
+
 module.exports = router;

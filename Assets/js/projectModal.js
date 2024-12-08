@@ -16,30 +16,31 @@ document.addEventListener('DOMContentLoaded', function() {
     saveProjectBtn.addEventListener('click', async function() {
         try {
             const user = JSON.parse(sessionStorage.getItem('user'));
-            const taskId = sessionStorage.getItem('pendingTaskId');
+            const pendingTasks = JSON.parse(sessionStorage.getItem('pendingTasks') || '[]');
             
-            if (!taskId) {
-                throw new Error('No task selected for this project');
+            console.log('Retrieved pending tasks:', pendingTasks); // Debug log
+
+            if (!pendingTasks || pendingTasks.length === 0) {
+                const modal = document.getElementById('add-initial-task-staticBackdrop');
+                const modalInstance = bootstrap.Modal.show(modal);
+                alert('Please add tasks first');
+                return;
             }
 
-            // Get form data
+            // Get project data
             const projectData = {
                 project_title: document.getElementById('projectTitle').value.trim(),
                 project_description: document.getElementById('projectDescription').value.trim(),
                 project_start_date: document.getElementById('startDate').value,
                 project_end_date: document.getElementById('endDate').value,
-                project_status: document.getElementById('status').value,
+                project_status: 'active',
                 user_id_: user.id
             };
 
-            console.log('Sending project data:', projectData);
-
-            // Create project
+            // Save project
             const projectResponse = await fetch(`${API_BASE}/projects`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
                 body: JSON.stringify(projectData)
             });
@@ -48,46 +49,72 @@ document.addEventListener('DOMContentLoaded', function() {
                 throw new Error('Failed to create project');
             }
 
-            const result = await projectResponse.json();
-            console.log('Project creation result:', result);
+            const projectResult = await projectResponse.json();
+            const projectId = projectResult.project_id_;
 
-            if (!result.success || !result.project_id_) {
-                throw new Error('Invalid project response from server');
+            // Save all pending tasks
+            for (const task of pendingTasks) {
+                const taskData = {
+                    ...task,
+                    user_id_: user.id
+                };
+
+                const taskResponse = await fetch(`${API_BASE}/tasks`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify(taskData)
+                });
+
+                if (!taskResponse.ok) {
+                    throw new Error('Failed to create task');
+                }
+
+                const taskResult = await taskResponse.json();
+
+                // Create project-task association
+                const associationResponse = await fetch(`${API_BASE}/project-tasks`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        project_id_: projectId,
+                        task_id_: taskResult.task_id_,
+                        task_assigned_at: new Date().toISOString()
+                    })
+                });
+
+                if (!associationResponse.ok) {
+                    const errorText = await associationResponse.text();
+                    console.error('Failed to create association:', errorText);
+                    throw new Error('Failed to associate task with project');
+                }
+
+                const associationResult = await associationResponse.json();
+                console.log('Association created:', associationResult);
             }
 
-            // Create project-task association
-            const associationResponse = await fetch(`${API_BASE}/project-tasks`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                credentials: 'include',
-                body: JSON.stringify({
-                    project_id_: result.project_id_,
-                    task_id_: parseInt(taskId)
-                })
-            });
+            // Clear temporary storage
+            sessionStorage.removeItem('pendingTasks');
+            temporaryTasks = [];
 
-            if (!associationResponse.ok) {
-                throw new Error('Failed to associate task with project');
+            // Close modal
+            const modal = document.getElementById('project-staticBackdrop');
+            const modalInstance = bootstrap.Modal.getInstance(modal);
+            if (modalInstance) {
+                modalInstance.hide();
             }
 
-            // Clear storage and close modal
-            sessionStorage.removeItem('pendingTaskId');
-            
-            const projectModal = document.getElementById('project-staticBackdrop');
-            const bsModal = bootstrap.Modal.getInstance(projectModal);
-            if (bsModal) {
-                bsModal.hide();
-            }
-
-            // Refresh display
+            // Refresh displays
+            await fetchAndDisplayTasks();
             await fetchAndDisplayProjects();
 
-            alert('Project and task saved successfully!');
+            alert('Project and tasks saved successfully!');
 
         } catch (error) {
-            console.error('Error saving project:', error);
+            console.error('Error saving project and tasks:', error);
             alert(error.message);
         }
     });
@@ -121,85 +148,74 @@ document.addEventListener('DOMContentLoaded', function() {
         initialTaskModal.show();
     });
 
-    // Add Task Button Handler
-    const addTaskBtn = document.getElementById('addTaskBtn');
-    if (addTaskBtn) {
-        addTaskBtn.addEventListener('click', async function(e) {
-            e.preventDefault();
-            
-            try {
-                const form = document.getElementById('addInitialTaskForm');
-                const taskData = {
-                    task_title: form.querySelector('#taskTitle').value.trim(),
-                    task_description: form.querySelector('#description').value.trim(),
-                    task_due_date: form.querySelector('#dueDate').value,
-                    task_priority: form.querySelector('#priority').value,
-                    user_id_: JSON.parse(sessionStorage.getItem('user')).id
-                };
+    // Store tasks temporarily
+    let temporaryTasks = [];
 
-                console.log('Sending task data:', taskData);
+    // Add Task Button Handler (just adds to container)
+    document.getElementById('addTaskBtn').addEventListener('click', function() {
+        const taskTitle = document.getElementById('initialTaskTitle').value.trim();
+        const description = document.getElementById('initialDescription').value.trim();
+        const dueDate = document.getElementById('initialDueDate').value;
+        const priority = document.getElementById('initialPriority').value;
 
-                const response = await fetch(`${API_BASE}/tasks`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    credentials: 'include',
-                    body: JSON.stringify(taskData)
-                });
+        if (!taskTitle || !dueDate || !priority) {
+            alert('Please fill in all required fields');
+            return;
+        }
 
-                if (!response.ok) {
-                    throw new Error('Failed to create task');
-                }
-
-                const savedTask = await response.json();
-                console.log('Task saved:', savedTask);
-
-                // Store ONLY the current task ID
-                sessionStorage.setItem('pendingTaskId', savedTask.task_id_);
-                console.log('Stored pending task ID:', savedTask.task_id_);
-
-                // Create and add task card
-                const taskCard = createInitialTaskCard(savedTask);
-                document.querySelector('.task-added-container').appendChild(taskCard);
-
-                // Clear form
-                form.reset();
-
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Error adding task. Please try again.');
-            }
+        // Add to temporary array
+        temporaryTasks.push({
+            task_title: taskTitle,
+            task_description: description,
+            task_due_date: dueDate,
+            task_priority: priority
         });
-    }
 
-    // Add Initial Task Save Button Handler
-    document.getElementById('saveInitialTaskBtn').addEventListener('click', async function() {
-        try {
-            const taskContainer = document.querySelector('.task-added-container');
-            if (!taskContainer.children.length) {
-                alert('Please add at least one task before saving');
-                return;
-            }
+        // Add to visual container
+        const taskContainer = document.querySelector('.task-added-container');
+        const taskElement = document.createElement('div');
+        taskElement.className = 'added-task-item mb-2 p-2 border rounded';
+        taskElement.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center">
+                <strong>${taskTitle}</strong>
+                <button type="button" class="btn-close" aria-label="Remove task"></button>
+            </div>
+            <div>Due: ${dueDate}</div>
+            <div>Priority: ${priority}</div>
+        `;
 
-            // Your existing save logic here...
+        // Add remove functionality
+        taskElement.querySelector('.btn-close').addEventListener('click', function() {
+            const index = Array.from(taskContainer.children).indexOf(taskElement);
+            temporaryTasks.splice(index, 1);
+            taskElement.remove();
+        });
 
-            // Close the modal using Bootstrap's modal method
-            const modal = document.getElementById('add-initial-task-staticBackdrop');
-            const modalInstance = bootstrap.Modal.getInstance(modal);
-            if (modalInstance) {
-                modalInstance.hide();
-            } else {
-                // Fallback if getInstance doesn't work
-                const newModal = new bootstrap.Modal(modal);
-                newModal.hide();
-            }
+        taskContainer.appendChild(taskElement);
 
-            // Rest of your code...
+        // Clear form
+        document.getElementById('addInitialTaskForm').reset();
+    });
 
-        } catch (error) {
-            console.error('Error saving initial task:', error);
-            alert(error.message);
+    // Initial Task Modal Save Button Handler
+    document.getElementById('saveInitialTaskBtn').addEventListener('click', function() {
+        if (temporaryTasks.length === 0) {
+            alert('Please add at least one task before saving');
+            return;
+        }
+
+        console.log('Temporary tasks before saving:', temporaryTasks); // Debug log
+
+        // Store tasks in sessionStorage for later use
+        sessionStorage.setItem('pendingTasks', JSON.stringify(temporaryTasks));
+        
+        console.log('Tasks stored in session:', sessionStorage.getItem('pendingTasks')); // Debug log
+
+        // Close the initial task modal
+        const modal = document.getElementById('add-initial-task-staticBackdrop');
+        const modalInstance = bootstrap.Modal.getInstance(modal);
+        if (modalInstance) {
+            modalInstance.hide();
         }
     });
 
