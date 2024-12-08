@@ -1,9 +1,11 @@
 const express = require('express');
 const cors = require('cors');
-const db = require('../db');  // Correct path to point to db.js in the app folder
+const db = require('../db');  // Point directly to db.js in app folder
 const taskRoutes = require('../routes/taskManagement');
 const projectRoutes = require('../routes/projectManagement');
 const authRoutes = require('../routes/authManagement');
+const projectTaskRoutes = require('../routes/projectTaskManagement');
+const activityRoutes = require('../routes/activityManagement');
 
 const app = express();
 
@@ -33,8 +35,17 @@ app.get('/debug/tasks', async (req, res) => {
 app.use('/api/tasks', taskRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/project-tasks', projectTaskRoutes);
+app.use('/api/activities', activityRoutes);
 
-app.listen(4000, () => {
-    console.log('Server running on http://localhost:4000');
+// Error handler
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({ error: 'Something broke!' });
+});
+
+const PORT = 4000;
+app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
     console.log('Ready to receive requests...');
 });

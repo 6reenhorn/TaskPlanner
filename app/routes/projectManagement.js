@@ -5,44 +5,31 @@ const db = require('../db');
 router.post('/', async (req, res) => {
     try {
         console.log('Raw request body:', req.body);
+        
         const { project_title, project_description, project_start_date, project_end_date, project_status, user_id_ } = req.body;
-
-        // Log each value separately
-        console.log('Extracted values:', {
-            project_title,
-            project_description,
-            project_start_date,
-            project_end_date,
-            project_status,
-            user_id_
-        });
-
-        // Set null for optional fields if they're undefined
-        const values = [
-            project_title || null,
-            project_description || null,
-            project_start_date || null,
-            project_end_date || null,
-            project_status || null,
-            user_id_ || null
-        ];
-
-        console.log('Values to be inserted:', values);
-
+        
         const [result] = await db.execute(
             'INSERT INTO projects (project_title, project_description, project_start_date, project_end_date, project_status, user_id_) VALUES (?, ?, ?, ?, ?, ?)',
-            values
+            [project_title, project_description, project_start_date, project_end_date, project_status, user_id_]
         );
 
         console.log('Database result:', result);
-        res.status(201).json({ message: 'Project created successfully', projectId: result.insertId });
-    } catch (err) {
-        console.error('Detailed error:', {
-            message: err.message,
-            stack: err.stack,
-            body: req.body
+
+        // Send back just the project ID and success status
+        const response = {
+            success: true,
+            project_id_: result.insertId
+        };
+
+        console.log('Sending response:', response);
+        res.status(201).json(response);
+
+    } catch (error) {
+        console.error('Error creating project:', error);
+        res.status(500).json({ 
+            success: false,
+            error: 'Failed to create project'
         });
-        res.status(500).json({ error: 'Failed to create project' });
     }
 });
 
@@ -70,14 +57,24 @@ router.delete('/:id', async (req, res) => {
         );
 
         if (result.affectedRows === 0) {
-            return res.status(404).json({ error: 'Project not found' });
+            return res.status(404).json({ 
+                success: false,
+                error: 'Project not found' 
+            });
         }
 
-        console.log('Project deleted successfully');
-        res.status(200).json({ message: 'Project deleted successfully' });
-    } catch (err) {
-        console.error('Error deleting project:', err);
-        res.status(500).json({ error: 'Failed to delete project' });
+        res.json({ 
+            success: true,
+            message: 'Project deleted successfully' 
+        });
+
+    } catch (error) {
+        console.error('Error deleting project:', error);
+        res.status(500).json({ 
+            success: false,
+            error: 'Failed to delete project',
+            details: error.message 
+        });
     }
 });
 

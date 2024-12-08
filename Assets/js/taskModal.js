@@ -24,10 +24,19 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Save task functionality
     saveTaskBtn.addEventListener('click', async function() {
+        // Check if form is valid
+        const form = document.getElementById('newTaskForm');
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+
+        const taskId = this.getAttribute('data-task-id');
+        const isEdit = !!taskId;
+
         try {
             const user = JSON.parse(sessionStorage.getItem('user'));
-            console.log('User data:', user);
-
+            
             const taskData = {
                 task_title: document.getElementById('taskTitle').value,
                 task_description: document.getElementById('description').value,
@@ -35,10 +44,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 task_priority: document.getElementById('priority').value,
                 user_id_: user.id
             };
-            console.log('Sending task data:', taskData);
 
-            const response = await fetch('http://localhost:4000/api/tasks', {
-                method: 'POST',
+            console.log('Sending request to:', isEdit ? `http://localhost:4000/api/tasks/${taskId}` : 'http://localhost:4000/api/tasks');
+            console.log('Request method:', isEdit ? 'PUT' : 'POST');
+            console.log('Task data:', taskData);
+
+            const url = isEdit 
+                ? `http://localhost:4000/api/tasks/${taskId}`
+                : 'http://localhost:4000/api/tasks';
+
+            const response = await fetch(url, {
+                method: isEdit ? 'PUT' : 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json'
@@ -47,24 +63,26 @@ document.addEventListener('DOMContentLoaded', function() {
                 body: JSON.stringify(taskData)
             });
 
+            console.log('Response status:', response.status);
+
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
             const result = await response.json();
-            console.log('Server response:', result);
+            console.log(isEdit ? 'Task updated successfully:' : 'Task saved successfully:', result);
 
-            // Success handling
+            // Close modal and reset form
             const modal = bootstrap.Modal.getInstance(document.getElementById('task-staticBackdrop'));
             modal.hide();
             document.getElementById('newTaskForm').reset();
 
-            // Fetch and display tasks after saving
+            // Refresh tasks display
             await fetchAndDisplayTasks();
 
         } catch (error) {
-            console.error('Detailed error:', error);
-            alert('Error saving task: ' + error.message);
+            console.error(isEdit ? 'Error updating task:' : 'Error saving task:', error);
+            alert(isEdit ? 'Error updating task. Please try again.' : 'Error saving task. Please try again.');
         }
     });
 
@@ -127,7 +145,7 @@ function createTaskCard(task) {
                 <li>Priority: <span>${task.task_priority}</span></li>
             </ul>
             <div class="card-btn-group d-flex gap-2">
-                <button type="button" class="card-btn-group task-btn-edit" onclick="alert('Edit feature coming soon!')">Edit</button>
+                <button type="button" class="card-btn-group task-btn-edit">Edit</button>
                 <button type="button" class="card-btn-group task-btn-delete">Delete</button>
                 <button type="button" class="card-btn-group task-btn-comment" onclick="alert('Comment feature coming soon!')">Comment</button>
             </div>
@@ -148,54 +166,63 @@ function createTaskCard(task) {
 // Fetch tasks and update UI
 async function fetchTasks() {
     try {
-        const response = await fetch(`${BASE_URL}/tasks`);
-
+        const response = await fetch(`${BASE_URL}/tasks`, {
+            headers: {
+                'Accept': 'application/json'
+            },
+            credentials: 'include'
+        });
+        
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-
+        
         const tasks = await response.json();
         console.log('Fetched tasks:', tasks);
-
-        // Clear existing tasks
-        const taskContainer = document.getElementById('taskContainer');
-        taskContainer.innerHTML = '';
-
-        // Create task cards
-        tasks.forEach(task => createTaskCard(task));
-
+        return tasks;
     } catch (error) {
         console.error('Error fetching tasks:', error);
+        return [];
     }
 }
 
 // Function to delete a task
 async function deleteTask(taskId) {
     try {
+        console.log('Deleting task with ID:', taskId);
+
         const response = await fetch(`http://localhost:4000/api/tasks/${taskId}`, {
             method: 'DELETE',
             headers: {
-                'Content-Type': 'application/json'
-            }
+                'Accept': 'application/json'
+            },
+            credentials: 'include'
         });
+
+        console.log('Delete response status:', response.status);
 
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
         console.log('Task deleted successfully');
-        await fetchAndDisplayTasks(); // This will update both main tasks and upcoming tasks
+        await fetchAndDisplayTasks();
     } catch (error) {
         console.error('Error deleting task:', error);
+        alert('Error deleting task. Please try again.');
     }
 }
 
 // Add event listener to delete buttons
-document.addEventListener('click', function(event) {
-    if (event.target.classList.contains('task-btn-delete')) {
-        const taskCard = event.target.closest('.card');
+document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('task-btn-delete')) {
+        const taskCard = e.target.closest('.card');
         const taskId = taskCard.getAttribute('data-task-id');
-        deleteTask(taskId);
+        const taskTitle = taskCard.querySelector('.card-header').textContent.trim();
+
+        if (confirm(`Are you sure you want to delete the task "${taskTitle}"?`)) {
+            deleteTask(taskId);
+        }
     }
 });
 
@@ -398,3 +425,56 @@ function fetchRecentActivities() {
 
 // Call this function when the page loads or after adding a task
 document.addEventListener('DOMContentLoaded', fetchRecentActivities);
+
+// Function to set modal mode (create or edit)
+function setModalMode(mode, taskData = null) {
+    const modalTitle = document.querySelector('#task-staticBackdrop .modal-title');
+    const saveButton = document.getElementById('saveTaskBtn');
+    
+    if (mode === 'edit') {
+        modalTitle.textContent = 'Edit Task';
+        saveButton.textContent = 'Update';
+        // Fill form with existing task data
+        document.getElementById('taskTitle').value = taskData.task_title;
+        document.getElementById('dueDate').value = taskData.task_due_date.split('T')[0];
+        document.getElementById('priority').value = taskData.task_priority;
+        document.getElementById('description').value = taskData.task_description || '';
+        
+        // Store task ID for update
+        saveButton.setAttribute('data-task-id', taskData.task_id_);
+    } else {
+        modalTitle.textContent = 'Add New Task';
+        saveButton.textContent = 'Save';
+        document.getElementById('newTaskForm').reset();
+        saveButton.removeAttribute('data-task-id');
+    }
+}
+
+// Add edit button click handler
+document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('task-btn-edit')) {
+        const taskCard = e.target.closest('.card');
+        const taskId = taskCard.getAttribute('data-task-id');
+        
+        // Get task data from the card
+        const taskData = {
+            task_id_: taskId,
+            task_title: taskCard.querySelector('.card-header').textContent.trim(),
+            task_due_date: taskCard.querySelector('li:first-child span').textContent,
+            task_priority: taskCard.querySelector('li:last-child span').textContent,
+            task_description: taskCard.querySelector('.card-description-text')?.textContent.trim() || ''
+        };
+
+        // Set modal to edit mode and fill with task data
+        setModalMode('edit', taskData);
+        
+        // Open modal
+        const modal = new bootstrap.Modal(document.getElementById('task-staticBackdrop'));
+        modal.show();
+    }
+});
+
+// Update the activities fetch function
+async function fetchActivities() {
+    return [];
+}

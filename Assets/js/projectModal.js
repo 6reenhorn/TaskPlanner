@@ -1,3 +1,5 @@
+const API_BASE = 'http://localhost:4000/api';
+
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Project Modal JS Loaded');
     
@@ -13,50 +15,80 @@ document.addEventListener('DOMContentLoaded', function() {
     
     saveProjectBtn.addEventListener('click', async function() {
         try {
-            console.log('Project save button clicked');
-            
-            // Get user data from session storage
             const user = JSON.parse(sessionStorage.getItem('user'));
+            const taskId = sessionStorage.getItem('pendingTaskId');
             
+            if (!taskId) {
+                throw new Error('No task selected for this project');
+            }
+
+            // Get form data
             const projectData = {
-                project_title: document.getElementById('projectTitle').value,
-                project_description: document.getElementById('projectDescription').value,
+                project_title: document.getElementById('projectTitle').value.trim(),
+                project_description: document.getElementById('projectDescription').value.trim(),
                 project_start_date: document.getElementById('startDate').value,
                 project_end_date: document.getElementById('endDate').value,
                 project_status: document.getElementById('status').value,
                 user_id_: user.id
             };
-            
+
             console.log('Sending project data:', projectData);
 
-            const response = await fetch('http://localhost:4000/api/projects', {
+            // Create project
+            const projectResponse = await fetch(`${API_BASE}/projects`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
+                    'Content-Type': 'application/json'
                 },
                 credentials: 'include',
                 body: JSON.stringify(projectData)
             });
 
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+            if (!projectResponse.ok) {
+                throw new Error('Failed to create project');
             }
 
-            const result = await response.json();
-            console.log('Project saved successfully:', result);
+            const result = await projectResponse.json();
+            console.log('Project creation result:', result);
 
-            // Refresh projects display
-            await fetchAndDisplayProjects();
+            if (!result.success || !result.project_id_) {
+                throw new Error('Invalid project response from server');
+            }
+
+            // Create project-task association
+            const associationResponse = await fetch(`${API_BASE}/project-tasks`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify({
+                    project_id_: result.project_id_,
+                    task_id_: parseInt(taskId)
+                })
+            });
+
+            if (!associationResponse.ok) {
+                throw new Error('Failed to associate task with project');
+            }
+
+            // Clear storage and close modal
+            sessionStorage.removeItem('pendingTaskId');
             
-            // Close modal and reset form
-            const modal = bootstrap.Modal.getInstance(document.getElementById('project-staticBackdrop'));
-            modal.hide();
-            projectForm.reset();
+            const projectModal = document.getElementById('project-staticBackdrop');
+            const bsModal = bootstrap.Modal.getInstance(projectModal);
+            if (bsModal) {
+                bsModal.hide();
+            }
+
+            // Refresh display
+            await fetchAndDisplayProjects();
+
+            alert('Project and task saved successfully!');
 
         } catch (error) {
             console.error('Error saving project:', error);
-            alert('Error saving project. Please try again.');
+            alert(error.message);
         }
     });
 
@@ -66,8 +98,149 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     addInitialTaskBtn.addEventListener('click', function() {
-        console.log('Add Initial Task button clicked in project modal');
-        alert('Add Initial Task feature coming soon!');
+        // First, store the project data
+        const projectData = {
+            project_title: document.getElementById('projectTitle').value,
+            project_description: document.getElementById('projectDescription').value,
+            project_start_date: document.getElementById('startDate').value,
+            project_end_date: document.getElementById('endDate').value,
+            project_status: document.getElementById('status').value
+        };
+
+        // Validate project data
+        if (!projectData.project_title || !projectData.project_start_date || !projectData.project_end_date) {
+            alert('Please fill in all required project fields first');
+            return;
+        }
+
+        // Store project data temporarily
+        sessionStorage.setItem('tempProjectData', JSON.stringify(projectData));
+        
+        // Open the initial task modal
+        const initialTaskModal = new bootstrap.Modal(document.getElementById('add-initial-task-staticBackdrop'));
+        initialTaskModal.show();
+    });
+
+    // Add Task Button Handler
+    const addTaskBtn = document.getElementById('addTaskBtn');
+    if (addTaskBtn) {
+        addTaskBtn.addEventListener('click', async function(e) {
+            e.preventDefault();
+            
+            try {
+                const form = document.getElementById('addInitialTaskForm');
+                const taskData = {
+                    task_title: form.querySelector('#taskTitle').value.trim(),
+                    task_description: form.querySelector('#description').value.trim(),
+                    task_due_date: form.querySelector('#dueDate').value,
+                    task_priority: form.querySelector('#priority').value,
+                    user_id_: JSON.parse(sessionStorage.getItem('user')).id
+                };
+
+                console.log('Sending task data:', taskData);
+
+                const response = await fetch(`${API_BASE}/tasks`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify(taskData)
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to create task');
+                }
+
+                const savedTask = await response.json();
+                console.log('Task saved:', savedTask);
+
+                // Store ONLY the current task ID
+                sessionStorage.setItem('pendingTaskId', savedTask.task_id_);
+                console.log('Stored pending task ID:', savedTask.task_id_);
+
+                // Create and add task card
+                const taskCard = createInitialTaskCard(savedTask);
+                document.querySelector('.task-added-container').appendChild(taskCard);
+
+                // Clear form
+                form.reset();
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error adding task. Please try again.');
+            }
+        });
+    }
+
+    // Save Initial Tasks Button Handler
+    const saveTaskBtn = document.getElementById('saveTaskBtn');
+    if (saveTaskBtn) {
+        saveTaskBtn.addEventListener('click', function() {
+            try {
+                // Get all tasks from the container
+                const taskContainer = document.querySelector('#add-initial-task-staticBackdrop .task-added-container');
+                const taskCards = taskContainer.querySelectorAll('.card');
+                
+                console.log('Number of task cards found:', taskCards.length);
+
+                if (taskCards.length === 0) {
+                    alert('Please add at least one task before saving');
+                    return;
+                }
+
+                // Extract task IDs
+                const taskIds = Array.from(taskCards).map(card => {
+                    const id = card.getAttribute('data-task-id');
+                    console.log('Found task ID:', id);
+                    return id;
+                });
+
+                // Store for project creation
+                sessionStorage.setItem('pendingTaskIds', JSON.stringify(taskIds));
+                console.log('Stored task IDs:', taskIds);
+
+                // Close modal using Bootstrap
+                const modalElement = document.getElementById('add-initial-task-staticBackdrop');
+                const modalInstance = bootstrap.Modal.getOrCreateInstance(modalElement);
+                modalInstance.hide();
+
+                // Clean up backdrop if it exists
+                const backdrop = document.querySelector('.modal-backdrop');
+                if (backdrop) backdrop.remove();
+
+                // Remove modal-open class from body
+                document.body.classList.remove('modal-open');
+
+                alert(`${taskIds.length} task(s) saved successfully! Please complete project creation to finalize.`);
+
+            } catch (error) {
+                console.error('Error in save handler:', error);
+                alert('Error saving tasks. Please try again.');
+            }
+        });
+    }
+
+    // Choose Task Button Handler
+    document.getElementById('chooseTaskBtn').addEventListener('click', async function() {
+        try {
+            const response = await fetch('http://localhost:4000/api/tasks');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const tasks = await response.json();
+            
+            // Create and show task selection modal
+            const taskSelectionHTML = createTaskSelectionModal(tasks);
+            document.body.insertAdjacentHTML('beforeend', taskSelectionHTML);
+            
+            const selectionModal = new bootstrap.Modal(document.getElementById('taskSelectionModal'));
+            selectionModal.show();
+            
+        } catch (error) {
+            console.error('Error fetching tasks:', error);
+            alert('Error loading tasks. Please try again.');
+        }
     });
 });
 
@@ -232,3 +405,93 @@ async function deleteProject(projectId) {
         alert('Error deleting project. Please try again.');
     }
 }
+
+// Function to create initial task card
+function createInitialTaskCard(task) {
+    const card = document.createElement('div');
+    card.className = 'card mb-2';
+    card.setAttribute('data-task-id', task.task_id_);
+
+    // Format the date for display
+    const dueDate = new Date(task.task_due_date).toLocaleDateString();
+
+    card.innerHTML = `
+        <div class="card-body p-2">
+            <div class="d-flex justify-content-between align-items-center">
+                <h6 class="card-title mb-1">${task.task_title}</h6>
+                <button type="button" class="btn-close remove-task" aria-label="Remove"></button>
+            </div>
+            <div class="card-text small">
+                <div>Due: ${dueDate}</div>
+                <div>Priority: ${task.task_priority}</div>
+                ${task.task_description ? `<div>Description: ${task.task_description}</div>` : ''}
+            </div>
+        </div>
+    `;
+
+    // Add remove functionality
+    card.querySelector('.remove-task').addEventListener('click', function() {
+        card.remove();
+    });
+
+    return card;
+}
+
+// Function to create task selection modal
+function createTaskSelectionModal(tasks) {
+    return `
+        <div class="modal fade" id="taskSelectionModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Select Tasks</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="task-list">
+                            ${tasks.map(task => `
+                                <div class="task-item" data-task-id="${task.task_id_}">
+                                    <input type="checkbox" id="task_${task.task_id_}">
+                                    <label for="task_${task.task_id_}">${task.task_title}</label>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="modal-btn" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="modal-btn" onclick="addSelectedTasks()">Add Selected</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// Function to add selected tasks
+window.addSelectedTasks = async function() {
+    const selectedTasks = document.querySelectorAll('#taskSelectionModal input[type="checkbox"]:checked');
+    const taskContainer = document.querySelector('.task-added-container');
+    
+    for (const checkbox of selectedTasks) {
+        const taskId = checkbox.closest('.task-item').dataset.taskId;
+        
+        try {
+            const response = await fetch(`http://localhost:4000/api/tasks/${taskId}`);
+            const task = await response.json();
+            
+            const taskCard = createInitialTaskCard(task);
+            taskContainer.appendChild(taskCard);
+        } catch (error) {
+            console.error('Error adding selected task:', error);
+        }
+    }
+    
+    // Close the selection modal
+    const modal = bootstrap.Modal.getInstance(document.getElementById('taskSelectionModal'));
+    modal.hide();
+    
+    // Remove the modal from DOM after hiding
+    document.getElementById('taskSelectionModal').addEventListener('hidden.bs.modal', function() {
+        this.remove();
+    });
+};
