@@ -242,6 +242,17 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('Error loading tasks. Please try again.');
         }
     });
+
+    // Add Initial Task Save Button Handler
+    document.getElementById('saveInitialTaskBtn').addEventListener('click', async function() {
+        const taskContainer = document.querySelector('.task-added-container');
+        if (!taskContainer.children.length) {
+            alert('Please add at least one task before saving');
+            return;
+        }
+
+        // Rest of your existing project task save logic...
+    });
 });
 
 // Function to fetch and display projects

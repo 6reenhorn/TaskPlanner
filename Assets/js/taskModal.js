@@ -478,3 +478,49 @@ document.addEventListener('click', function(e) {
 async function fetchActivities() {
     return [];
 }
+
+// Create New Task Save Button Handler (for Task Management page)
+document.getElementById('saveNewTaskBtn').addEventListener('click', async function() {
+    try {
+        const user = JSON.parse(sessionStorage.getItem('user'));
+        
+        // Get form data
+        const taskData = {
+            task_title: document.getElementById('taskTitle').value.trim(),
+            task_description: document.getElementById('description').value.trim(),
+            task_due_date: document.getElementById('dueDate').value,
+            task_priority: document.getElementById('priority').value,
+            user_id_: user.id
+        };
+
+        // Create task
+        const response = await fetch(`${BASE_URL}/tasks`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify(taskData)
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to create task');
+        }
+
+        // Close modal
+        const taskModal = document.getElementById('task-staticBackdrop');
+        const bsModal = bootstrap.Modal.getInstance(taskModal);
+        if (bsModal) {
+            bsModal.hide();
+        }
+
+        // Refresh task list
+        await fetchAndDisplayTasks();
+
+        alert('Task saved successfully!');
+
+    } catch (error) {
+        console.error('Error saving task:', error);
+        alert(error.message);
+    }
+});
