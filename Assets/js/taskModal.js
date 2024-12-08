@@ -484,7 +484,6 @@ document.getElementById('saveNewTaskBtn').addEventListener('click', async functi
     try {
         const user = JSON.parse(sessionStorage.getItem('user'));
         
-        // Get form data
         const taskData = {
             task_title: document.getElementById('taskTitle').value.trim(),
             task_description: document.getElementById('description').value.trim(),
@@ -493,7 +492,6 @@ document.getElementById('saveNewTaskBtn').addEventListener('click', async functi
             user_id_: user.id
         };
 
-        // Create task
         const response = await fetch(`${BASE_URL}/tasks`, {
             method: 'POST',
             headers: {
@@ -507,11 +505,15 @@ document.getElementById('saveNewTaskBtn').addEventListener('click', async functi
             throw new Error('Failed to create task');
         }
 
-        // Close modal
-        const taskModal = document.getElementById('task-staticBackdrop');
-        const bsModal = bootstrap.Modal.getInstance(taskModal);
-        if (bsModal) {
-            bsModal.hide();
+        // Close the modal using Bootstrap's modal method
+        const modal = document.getElementById('task-staticBackdrop');
+        const modalInstance = bootstrap.Modal.getInstance(modal);
+        if (modalInstance) {
+            modalInstance.hide();
+        } else {
+            // Fallback if getInstance doesn't work
+            const newModal = new bootstrap.Modal(modal);
+            newModal.hide();
         }
 
         // Refresh task list

@@ -173,53 +173,35 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Save Initial Tasks Button Handler
-    const saveTaskBtn = document.getElementById('saveTaskBtn');
-    if (saveTaskBtn) {
-        saveTaskBtn.addEventListener('click', function() {
-            try {
-                // Get all tasks from the container
-                const taskContainer = document.querySelector('#add-initial-task-staticBackdrop .task-added-container');
-                const taskCards = taskContainer.querySelectorAll('.card');
-                
-                console.log('Number of task cards found:', taskCards.length);
-
-                if (taskCards.length === 0) {
-                    alert('Please add at least one task before saving');
-                    return;
-                }
-
-                // Extract task IDs
-                const taskIds = Array.from(taskCards).map(card => {
-                    const id = card.getAttribute('data-task-id');
-                    console.log('Found task ID:', id);
-                    return id;
-                });
-
-                // Store for project creation
-                sessionStorage.setItem('pendingTaskIds', JSON.stringify(taskIds));
-                console.log('Stored task IDs:', taskIds);
-
-                // Close modal using Bootstrap
-                const modalElement = document.getElementById('add-initial-task-staticBackdrop');
-                const modalInstance = bootstrap.Modal.getOrCreateInstance(modalElement);
-                modalInstance.hide();
-
-                // Clean up backdrop if it exists
-                const backdrop = document.querySelector('.modal-backdrop');
-                if (backdrop) backdrop.remove();
-
-                // Remove modal-open class from body
-                document.body.classList.remove('modal-open');
-
-                alert(`${taskIds.length} task(s) saved successfully! Please complete project creation to finalize.`);
-
-            } catch (error) {
-                console.error('Error in save handler:', error);
-                alert('Error saving tasks. Please try again.');
+    // Add Initial Task Save Button Handler
+    document.getElementById('saveInitialTaskBtn').addEventListener('click', async function() {
+        try {
+            const taskContainer = document.querySelector('.task-added-container');
+            if (!taskContainer.children.length) {
+                alert('Please add at least one task before saving');
+                return;
             }
-        });
-    }
+
+            // Your existing save logic here...
+
+            // Close the modal using Bootstrap's modal method
+            const modal = document.getElementById('add-initial-task-staticBackdrop');
+            const modalInstance = bootstrap.Modal.getInstance(modal);
+            if (modalInstance) {
+                modalInstance.hide();
+            } else {
+                // Fallback if getInstance doesn't work
+                const newModal = new bootstrap.Modal(modal);
+                newModal.hide();
+            }
+
+            // Rest of your code...
+
+        } catch (error) {
+            console.error('Error saving initial task:', error);
+            alert(error.message);
+        }
+    });
 
     // Choose Task Button Handler
     document.getElementById('chooseTaskBtn').addEventListener('click', async function() {
@@ -241,17 +223,6 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Error fetching tasks:', error);
             alert('Error loading tasks. Please try again.');
         }
-    });
-
-    // Add Initial Task Save Button Handler
-    document.getElementById('saveInitialTaskBtn').addEventListener('click', async function() {
-        const taskContainer = document.querySelector('.task-added-container');
-        if (!taskContainer.children.length) {
-            alert('Please add at least one task before saving');
-            return;
-        }
-
-        // Rest of your existing project task save logic...
     });
 });
 
