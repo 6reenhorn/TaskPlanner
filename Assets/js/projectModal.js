@@ -438,26 +438,30 @@ function createInitialTaskCard(task) {
 // Function to create task selection modal
 function createTaskSelectionModal(tasks) {
     return `
-        <div class="modal fade" id="taskSelectionModal" tabindex="-1">
-            <div class="modal-dialog">
-                <div class="modal-content">
+        <div class="modal fade task-selection-modal" id="taskSelectionModal" tabindex="-1">
+            <div class="modal-dialog modal-sm modal-dialog-scrollable m-0">
+                <div class="modal-content rounded-3">
                     <div class="modal-header">
-                        <h5 class="modal-title">Select Tasks</h5>
+                        <h5 class="modal-title fs-6">Select Tasks</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
                         <div class="task-list">
                             ${tasks.map(task => `
-                                <div class="task-item" data-task-id="${task.task_id_}">
-                                    <input type="checkbox" id="task_${task.task_id_}">
-                                    <label for="task_${task.task_id_}">${task.task_title}</label>
+                                <div class="task-item mb-2 p-2 border rounded" data-task-id="${task.task_id_}">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="task_${task.task_id_}">
+                                        <label class="form-check-label" for="task_${task.task_id_}">
+                                            ${task.task_title}
+                                        </label>
+                                    </div>
                                 </div>
                             `).join('')}
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="modal-btn" data-bs-dismiss="modal">Cancel</button>
-                        <button type="button" class="modal-btn" onclick="addSelectedTasks()">Add Selected</button>
+                    <div class="modal-footer d-flex justify-content-between">
+                        <button type="button" class="card-btn-group modal-btn" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="card-btn-group modal-btn" onclick="addSelectedTasks()">Add Selected</button>
                     </div>
                 </div>
             </div>

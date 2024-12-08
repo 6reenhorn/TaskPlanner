@@ -135,7 +135,7 @@
 
 /* Task Selection Modal Styling */
 .task-list {
-    max-height: 300px;
+    max-height: 200px;
     overflow-y: auto;
 }
 
@@ -188,6 +188,69 @@
 
 .task-added-container::-webkit-scrollbar-thumb:hover {
     background: #555;
+}
+
+/* Task Selection Modal Styling */
+.task-selection-modal .modal-dialog {
+    width: 350px; 
+    position: fixed;
+    top: 20.3%;
+    right: 13%;
+    transform: translate(-50%, -50%);
+}
+
+.task-selection-modal .modal-content {
+    border-radius: 0 0 0 10px;
+    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.task-selection-modal .task-list {
+    height: 200px;
+    overflow-y: auto;
+}
+
+.task-selection-modal .task-item {
+    transition: background-color 0.2s;
+}
+
+.task-selection-modal .task-item:hover {
+    background-color: #f8f9fa;
+}
+
+/* Custom scrollbar for task list */
+.task-selection-modal .task-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.task-selection-modal .task-list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.task-selection-modal .task-list::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 3px;
+}
+
+.task-selection-modal .task-list::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+.task-selection-modal .card-btn-group {
+    border: 2px solid var(--bg-color-1);
+    color: var(--primary-color);
+    font-size: 10px;
+    font-weight: 600;
+    width: 125px;
+    background-color: transparent;
+    border-radius: 5px;
+    padding: 5px 0 5px 0;
+}
+
+.task-selection-modal .card-btn-group:hover {
+    border: 2px solid var(--accent-color-3);
+    color: var(--accent-color-3);
+    background: var(--bg-color-1);
+    transition: ease-in all 0.2s;
 }
 
 
