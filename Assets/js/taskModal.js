@@ -477,42 +477,25 @@ document.addEventListener('DOMContentLoaded', fetchRecentActivities);
 
 // Function to set modal mode (create or edit)
 function setModalMode(mode, taskData = null) {
-    console.log('Setting modal mode:', mode);
-    
-    const modalElement = document.getElementById('task-staticBackdrop');
-    if (!modalElement) {
-        console.error('Modal element not found');
-        return;
-    }
-
-    const modalTitle = modalElement.querySelector('.modal-title');
-    const createButton = document.getElementById('createTaskBtn');
-    const updateButton = document.getElementById('updateTaskBtn');
-    
-    if (!modalTitle || !createButton || !updateButton) {
-        console.error('Modal elements missing:', {
-            title: !!modalTitle,
-            createBtn: !!createButton,
-            updateBtn: !!updateButton
-        });
-        return;
-    }
+    const modalTitle = document.querySelector('#task-staticBackdrop .modal-title');
+    const saveButton = document.getElementById('saveNewTaskBtn');
     
     if (mode === 'edit') {
         modalTitle.textContent = 'Edit Task';
-        createButton.style.display = 'none';
-        updateButton.style.display = 'block';
-        
+        saveButton.textContent = 'Update';
         // Fill form with existing task data
         document.getElementById('taskTitle').value = taskData.task_title;
-        document.getElementById('dueDate').value = taskData.task_due_date;
+        document.getElementById('dueDate').value = taskData.task_due_date.split('T')[0];
         document.getElementById('priority').value = taskData.task_priority;
         document.getElementById('description').value = taskData.task_description || '';
         
         // Store task ID for update
-        updateButton.setAttribute('data-task-id', taskData.task_id_);
+        saveButton.setAttribute('data-task-id', taskData.task_id_);
     } else {
-        resetModalToCreateMode();
+        modalTitle.textContent = 'Add New Task';
+        saveButton.textContent = 'Save';
+        document.getElementById('newTaskForm').reset();
+        saveButton.removeAttribute('data-task-id');
     }
 }
 
@@ -774,15 +757,22 @@ document.getElementById('cancelTaskBtn').addEventListener('click', function() {
     resetModalToCreateMode();
 });
 
-// Modal close handler (for X button and clicking outside)
-document.getElementById('task-staticBackdrop').addEventListener('hidden.bs.modal', function () {
+// X button handler (btn-close class)
+document.querySelector('.btn-close').addEventListener('click', function() {
+    console.log('X button clicked');
+    resetModalToCreateMode();
+});
+
+// Modal close handler (using the correct modal class)
+document.querySelector('.new-task-modal').addEventListener('hidden.bs.modal', function () {
     console.log('Modal hidden - resetting to create mode');
     resetModalToCreateMode();
 });
 
 // Function to reset modal to create mode
 function resetModalToCreateMode() {
-    const modalTitle = document.querySelector('#task-staticBackdrop .modal-title');
+    console.log('Resetting modal to create mode');
+    const modalTitle = document.querySelector('#staticBackdropLabel'); // Using the correct ID
     const createButton = document.getElementById('createTaskBtn');
     const updateButton = document.getElementById('updateTaskBtn');
     
@@ -795,3 +785,24 @@ function resetModalToCreateMode() {
     updateButton.style.display = 'none';
     updateButton.removeAttribute('data-task-id');
 }
+
+// Ensure the DOM is fully loaded before attaching event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    // Cancel button handler
+    document.getElementById('cancelTaskBtn').addEventListener('click', function() {
+        console.log('Cancel button clicked');
+        resetModalToCreateMode();
+    });
+
+    // X button handler (btn-close class)
+    document.querySelector('.btn-close').addEventListener('click', function() {
+        console.log('X button clicked');
+        resetModalToCreateMode();
+    });
+
+    // Modal close handler (using the correct modal class)
+    document.querySelector('.new-task-modal').addEventListener('hidden.bs.modal', function () {
+        console.log('Modal hidden - resetting to create mode');
+        resetModalToCreateMode();
+    });
+});
