@@ -50,4 +50,70 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('Error logging in. Please try again.');
         }
     });
-}); 
+
+    // Add signup form handler
+    const signupForm = document.getElementById('signupForm');
+    
+    signupForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        console.log('Signup form submitted');
+
+        const username = document.getElementById('signupUsername').value;
+        const fullName = document.getElementById('signupFullName').value;
+        const email = document.getElementById('signupEmail').value;
+        const password = document.getElementById('signupPassword').value;
+
+        // Split full name into first and last name
+        const [firstName, ...lastNameParts] = fullName.split(' ');
+        const lastName = lastNameParts.join(' ');
+
+        try {
+            const response = await fetch('http://localhost:4000/api/auth/signup', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify({
+                    username,
+                    first_name: firstName,
+                    last_name: lastName,
+                    email,
+                    password
+                })
+            });
+
+            console.log('Response status:', response.status);
+            
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Signup failed');
+            }
+
+            const data = await response.json();
+            console.log('Signup response:', data);
+
+            alert('Signup successful! Please login.');
+            // Switch back to login panel
+            authPanel.classList.remove('show-signup');
+
+        } catch (error) {
+            console.error('Signup error:', error);
+            alert(error.message || 'Error signing up. Please try again.');
+        }
+    });
+});
+
+// Add event listeners for signup and login links
+const showSignup = document.getElementById('showSignup');
+const showLogin = document.getElementById('showLogin');
+const authPanel = document.querySelector('.auth-panel');
+
+showSignup.addEventListener('click', function() {
+    authPanel.classList.add('show-signup');
+});
+
+showLogin.addEventListener('click', function() {
+    authPanel.classList.remove('show-signup');
+});

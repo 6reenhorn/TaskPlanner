@@ -35,13 +35,14 @@ router.post('/', async (req, res) => {
 
 router.get('/', async (req, res) => {
     try {
-        console.log('Fetching projects');
-        const [projects] = await db.execute('SELECT * FROM projects');
-        console.log('Found projects:', projects);
-
+        const userId = req.query.userId;
+        const [projects] = await db.execute(
+            'SELECT * FROM projects WHERE user_id_ = ?',
+            [userId]
+        );
         res.json(projects);
-    } catch (err) {
-        console.error('Error fetching projects:', err);
+    } catch (error) {
+        console.error('Error fetching projects:', error);
         res.status(500).json({ error: 'Failed to fetch projects' });
     }
 });

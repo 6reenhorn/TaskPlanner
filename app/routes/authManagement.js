@@ -62,4 +62,47 @@ router.post('/login', async (req, res) => {
     }
 });
 
+// Add this to your existing routes
+router.post('/signup', async (req, res) => {
+    try {
+        console.log('Received signup request:', req.body);
+        const { username, first_name, last_name, email, password } = req.body;
+        
+        // Validate required fields
+        if (!username || !email || !password || !first_name) {
+            return res.status(400).json({ error: 'All fields are required' });
+        }
+
+        // Check if user already exists
+        const [existingUsers] = await db.execute(
+            'SELECT * FROM users WHERE user_email = ? OR username = ?',
+            [email, username]
+        );
+
+        if (existingUsers.length > 0) {
+            return res.status(409).json({ error: 'User already exists' });
+        }
+
+        // Hash password
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Insert new user with default role
+        const [result] = await db.execute(
+            'INSERT INTO users (username, first_name, last_name, user_email, user_password, user_role) VALUES (?, ?, ?, ?, ?, ?)',
+            [username, first_name, last_name || '', email, hashedPassword, 'user'] // Added default role 'user'
+        );
+
+        console.log('User created successfully:', result);
+
+        res.status(201).json({ 
+            message: 'User created successfully',
+            user_id: result.insertId
+        });
+
+    } catch (err) {
+        console.error('Signup error:', err);
+        res.status(500).json({ error: 'Signup failed' });
+    }
+});
+
 module.exports = router; 

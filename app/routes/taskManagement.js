@@ -5,13 +5,15 @@ const db = require('../db');
 // GET all tasks
 router.get('/', async (req, res) => {
     try {
-        console.log('Fetching tasks');
-        const [tasks] = await db.execute('SELECT * FROM tasks ORDER BY created_at DESC');
-        console.log('Found tasks:', tasks);
+        const userId = req.query.userId;
+        const [tasks] = await db.execute(
+            'SELECT * FROM tasks WHERE user_id_ = ?',
+            [userId]
+        );
         res.json(tasks);
-    } catch (err) {
-        console.error('Error fetching tasks:', err);
-        res.status(500).json({ error: err.message });
+    } catch (error) {
+        console.error('Error fetching tasks:', error);
+        res.status(500).json({ error: 'Failed to fetch tasks' });
     }
 });
 

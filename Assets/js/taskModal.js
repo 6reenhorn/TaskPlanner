@@ -93,28 +93,49 @@ document.addEventListener('DOMContentLoaded', function() {
 // Function to fetch and display tasks
 async function fetchAndDisplayTasks() {
     try {
-        const response = await fetch('http://localhost:4000/api/tasks');
+        const user = JSON.parse(sessionStorage.getItem('user'));
+        if (!user || !user.id) {
+            console.log('No user found in session');
+            return;
+        }
+
+        const response = await fetch(`${BASE_URL}/tasks?userId=${user.id}`, {
+            credentials: 'include'
+        });
+
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
+
         const tasks = await response.json();
         console.log('Fetched tasks:', tasks);
 
-        // Update main task container
+        // Update main task container (Task Management Page)
         const taskContainer = document.getElementById('taskContainer');
-        taskContainer.innerHTML = ''; // Clear existing tasks
+        if (taskContainer) {
+            taskContainer.innerHTML = ''; // Clear existing tasks
 
-        // Create and append task cards
-        tasks.forEach(task => {
-            const taskCard = createTaskCard(task);
-            taskContainer.appendChild(taskCard);
-        });
+            if (Array.isArray(tasks) && tasks.length > 0) {
+                tasks.forEach(task => {
+                    if (task.user_id_ === user.id) {
+                        const taskCard = createTaskCard(task);
+                        taskContainer.appendChild(taskCard);
+                    }
+                });
+            } else {
+                taskContainer.innerHTML = '<p class="text-center">No tasks found</p>';
+            }
+        }
 
-        // Update upcoming tasks
-        updateUpcomingTasks(tasks);
+        // Update upcoming tasks in dashboard
+        const dashboardSection = document.getElementById('dashboard');
+        if (dashboardSection && dashboardSection.classList.contains('active')) {
+            console.log('Updating dashboard upcoming tasks');
+            updateUpcomingTasks(tasks.filter(task => task.user_id_ === user.id));
+        }
 
     } catch (error) {
-        console.error('Error fetching and displaying tasks:', error);
+        console.error('Error fetching tasks:', error);
     }
 }
 
@@ -228,7 +249,14 @@ document.addEventListener('click', function(e) {
 
 // Function to filter and display today's tasks
 function updateUpcomingTasks(tasks) {
-    const upcomingTasksContainer = document.querySelector('.upcoming-task .row.my-1');
+    console.log('Updating upcoming tasks with:', tasks);
+    
+    // Update selector to match your HTML structure
+    const upcomingTasksContainer = document.querySelector('.upcoming-task .row.my-1.d-flex.align-items-center.mb-2');
+    if (!upcomingTasksContainer) {
+        console.error('Upcoming tasks container not found');
+        return;
+    }
     
     // Clear existing timers
     const existingRows = upcomingTasksContainer.querySelectorAll('[data-task-id]');
@@ -246,19 +274,35 @@ function updateUpcomingTasks(tasks) {
     const twoDaysFromNow = new Date(today);
     twoDaysFromNow.setDate(twoDaysFromNow.getDate() + 2);
 
+    console.log('Filtering tasks between:', today, 'and', twoDaysFromNow);
+
     let visibleIndex = 0;
+    let upcomingTasksFound = false;
 
     tasks.forEach(task => {
         const taskDueDate = new Date(task.task_due_date);
         taskDueDate.setHours(23, 59, 59, 0); // Set to end of the due date
 
+        console.log('Checking task:', task.task_title, 'due date:', taskDueDate);
+
         // Check if task is due within next 2 days
         if (taskDueDate >= today && taskDueDate <= twoDaysFromNow) {
+            console.log('Task is upcoming:', task.task_title);
             const taskRow = createTaskRow(task, visibleIndex);
             upcomingTasksContainer.appendChild(taskRow);
             visibleIndex++;
+            upcomingTasksFound = true;
         }
     });
+
+    if (!upcomingTasksFound) {
+        console.log('No upcoming tasks found');
+        upcomingTasksContainer.innerHTML = `
+            <div class="col-12 text-center">
+                <p>No upcoming tasks</p>
+            </div>
+        `;
+    }
 }
 
 function createTaskRow(task, visibleIndex) {

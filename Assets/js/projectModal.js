@@ -245,39 +245,38 @@ document.addEventListener('DOMContentLoaded', function() {
 // Function to fetch and display projects
 async function fetchAndDisplayProjects() {
     try {
-        const response = await fetch('http://localhost:4000/api/projects');
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const projects = await response.json();
-        console.log('Fetched projects:', projects);
-
-        // Log each project individually
-        projects.forEach(project => {
-            console.log('Project details:', {
-                id: project.project_id_,
-                title: project.project_title,
-                description: project.project_description,
-                startDate: project.project_start_date,
-                endDate: project.project_end_date,
-                status: project.project_status
-            });
-        });
-
-        // Get the container where projects should be displayed
-        const projectContainer = document.getElementById('projectContainer');
-        if (!projectContainer) {
-            console.error('Project container not found');
+        const user = JSON.parse(sessionStorage.getItem('user'));
+        if (!user || !user.id) {
+            console.log('No user found in session');
             return;
         }
 
+        const response = await fetch(`${API_BASE}/projects?userId=${user.id}`, {
+            credentials: 'include'
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const projects = await response.json();
+        console.log('Fetched projects:', projects);
+
+        // Update project container
+        const projectContainer = document.getElementById('projectContainer');
         projectContainer.innerHTML = ''; // Clear existing projects
 
-        // Create and append project cards
-        projects.forEach(project => {
-            const projectCard = createProjectCard(project);
-            projectContainer.appendChild(projectCard);
-        });
+        if (Array.isArray(projects) && projects.length > 0) {
+            // Only display projects belonging to current user
+            projects.forEach(project => {
+                if (project.user_id_ === user.id) {
+                    const projectCard = createProjectCard(project);
+                    projectContainer.appendChild(projectCard);
+                }
+            });
+        } else {
+            projectContainer.innerHTML = '<p class="text-center">No projects found</p>';
+        }
 
     } catch (error) {
         console.error('Error fetching projects:', error);
