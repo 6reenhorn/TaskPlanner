@@ -12,6 +12,11 @@ fetch('http://localhost:4000/tasks')
     .catch(err => console.error('Error fetching tasks:', err));
 
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded');
+    console.log('Create button exists:', !!document.getElementById('createTaskBtn'));
+    console.log('Update button exists:', !!document.getElementById('updateTaskBtn'));
+    console.log('Edit buttons exist:', !!document.querySelectorAll('.task-btn-edit').length);
+    
     console.log('DOM Content Loaded'); // Debug log
     
     const saveTaskBtn = document.getElementById('saveTaskBtn');
@@ -472,50 +477,236 @@ document.addEventListener('DOMContentLoaded', fetchRecentActivities);
 
 // Function to set modal mode (create or edit)
 function setModalMode(mode, taskData = null) {
-    const modalTitle = document.querySelector('#task-staticBackdrop .modal-title');
-    const saveButton = document.getElementById('saveTaskBtn');
+    console.log('Setting modal mode:', mode);
+    
+    const modalElement = document.getElementById('task-staticBackdrop');
+    if (!modalElement) {
+        console.error('Modal element not found');
+        return;
+    }
+
+    const modalTitle = modalElement.querySelector('.modal-title');
+    const createButton = document.getElementById('createTaskBtn');
+    const updateButton = document.getElementById('updateTaskBtn');
+    
+    if (!modalTitle || !createButton || !updateButton) {
+        console.error('Modal elements missing:', {
+            title: !!modalTitle,
+            createBtn: !!createButton,
+            updateBtn: !!updateButton
+        });
+        return;
+    }
     
     if (mode === 'edit') {
         modalTitle.textContent = 'Edit Task';
-        saveButton.textContent = 'Update';
+        createButton.style.display = 'none';
+        updateButton.style.display = 'block';
+        
         // Fill form with existing task data
         document.getElementById('taskTitle').value = taskData.task_title;
-        document.getElementById('dueDate').value = taskData.task_due_date.split('T')[0];
+        document.getElementById('dueDate').value = taskData.task_due_date;
         document.getElementById('priority').value = taskData.task_priority;
         document.getElementById('description').value = taskData.task_description || '';
         
         // Store task ID for update
-        saveButton.setAttribute('data-task-id', taskData.task_id_);
+        updateButton.setAttribute('data-task-id', taskData.task_id_);
     } else {
-        modalTitle.textContent = 'Add New Task';
-        saveButton.textContent = 'Save';
-        document.getElementById('newTaskForm').reset();
-        saveButton.removeAttribute('data-task-id');
+        resetModalToCreateMode();
     }
 }
 
-// Add edit button click handler
+// Edit button click handler
 document.addEventListener('click', function(e) {
-    if (e.target.classList.contains('task-btn-edit')) {
-        const taskCard = e.target.closest('.card');
-        const taskId = taskCard.getAttribute('data-task-id');
-        
-        // Get task data from the card
+    const editButton = e.target.closest('.task-btn-edit');
+    if (!editButton) return;
+    
+    console.log('Edit button clicked');
+    const taskCard = editButton.closest('.card');
+    if (!taskCard) {
+        console.error('No task card found');
+        return;
+    }
+    
+    const taskId = taskCard.getAttribute('data-task-id');
+    console.log('Task ID:', taskId);
+    
+    // Get task data from the card
+    const taskData = {
+        task_id_: taskId,
+        task_title: taskCard.querySelector('.card-header').textContent.trim(),
+        task_due_date: new Date(taskCard.querySelector('li:first-child span').textContent).toISOString().split('T')[0],
+        task_priority: taskCard.querySelector('li:last-child span').textContent.toLowerCase(),
+        task_description: taskCard.querySelector('.card-description-text')?.textContent.trim() || ''
+    };
+
+    console.log('Edit task data:', taskData);
+    
+    // Update the modal with task data
+    document.getElementById('taskTitle').value = taskData.task_title;
+    document.getElementById('dueDate').value = taskData.task_due_date;
+    document.getElementById('priority').value = taskData.task_priority;
+    document.getElementById('description').value = taskData.task_description;
+    
+    // Show update button, hide create button
+    document.getElementById('createTaskBtn').style.display = 'none';
+    const updateButton = document.getElementById('updateTaskBtn');
+    updateButton.style.display = 'block';
+    updateButton.setAttribute('data-task-id', taskId);
+    
+    // Update modal title
+    document.querySelector('#task-staticBackdrop .modal-title').textContent = 'Edit Task';
+    
+    // Show the modal
+    const modal = new bootstrap.Modal(document.getElementById('task-staticBackdrop'));
+    modal.show();
+});
+
+// Update task button handler
+document.getElementById('updateTaskBtn').addEventListener('click', async function() {
+    try {
+        const taskId = this.getAttribute('data-task-id');
+        if (!taskId) {
+            console.error('No task ID found');
+            return;
+        }
+
+        const user = JSON.parse(sessionStorage.getItem('user'));
+        if (!user || !user.id) {
+            console.error('No user found in session');
+            return;
+        }
+
         const taskData = {
-            task_id_: taskId,
-            task_title: taskCard.querySelector('.card-header').textContent.trim(),
-            task_due_date: taskCard.querySelector('li:first-child span').textContent,
-            task_priority: taskCard.querySelector('li:last-child span').textContent,
-            task_description: taskCard.querySelector('.card-description-text')?.textContent.trim() || ''
+            task_title: document.getElementById('taskTitle').value.trim(),
+            task_description: document.getElementById('description').value.trim(),
+            task_due_date: document.getElementById('dueDate').value,
+            task_priority: document.getElementById('priority').value,
+            user_id_: user.id
         };
 
-        // Set modal to edit mode and fill with task data
-        setModalMode('edit', taskData);
-        
-        // Open modal
-        const modal = new bootstrap.Modal(document.getElementById('task-staticBackdrop'));
-        modal.show();
+        console.log('Updating task:', taskData);
+
+        const response = await fetch(`${BASE_URL}/tasks/${taskId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify(taskData)
+        });
+
+        if (!response.ok) {
+            throw new Error(`Failed to update task: ${response.status}`);
+        }
+
+        const result = await response.json();
+        console.log('Task updated successfully:', result);
+
+        // Close modal and refresh tasks
+        const modal = bootstrap.Modal.getInstance(document.getElementById('task-staticBackdrop'));
+        modal.hide();
+        await fetchAndDisplayTasks();
+
+    } catch (error) {
+        console.error('Error updating task:', error);
+        alert(error.message);
     }
+});
+
+// Modify the create task button handler
+document.getElementById('createTaskBtn').addEventListener('click', async function(e) {
+    e.preventDefault(); // Prevent form submission if any
+    console.log('Create button clicked');
+    
+    try {
+        const user = JSON.parse(sessionStorage.getItem('user'));
+        if (!user || !user.id) {
+            console.error('No user found in session');
+            return;
+        }
+        
+        const taskData = {
+            task_title: document.getElementById('taskTitle').value.trim(),
+            task_description: document.getElementById('description').value.trim(),
+            task_due_date: document.getElementById('dueDate').value,
+            task_priority: document.getElementById('priority').value,
+            user_id_: user.id
+        };
+
+        console.log('Creating task with data:', taskData);
+
+        const response = await fetch(`${BASE_URL}/tasks`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify(taskData)
+        });
+
+        console.log('Response status:', response.status);
+
+        if (!response.ok) {
+            throw new Error(`Failed to create task: ${response.status}`);
+        }
+
+        const result = await response.json();
+        console.log('Task created:', result);
+
+        const modal = bootstrap.Modal.getInstance(document.getElementById('task-staticBackdrop'));
+        modal.hide();
+        
+        await fetchAndDisplayTasks();
+        console.log('Task created successfully');
+
+    } catch (error) {
+        console.error('Error creating task:', error);
+        alert(error.message);
+    }
+});
+
+// Add save button click handler for updating task
+document.getElementById('saveNewTaskBtn').addEventListener('click', async function() {
+    const taskId = this.getAttribute('data-task-id');
+    const taskTitle = document.getElementById('taskTitle').value;
+    const dueDate = document.getElementById('dueDate').value;
+    const priority = document.getElementById('priority').value;
+    const description = document.getElementById('description').value;
+
+    if (taskId) {
+        // Update existing task
+        try {
+            const response = await fetch(`${BASE_URL}/tasks/${taskId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    task_title: taskTitle,
+                    task_due_date: dueDate,
+                    task_priority: priority,
+                    task_description: description
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            console.log('Task updated successfully');
+            // Refresh tasks
+            await fetchAndDisplayTasks();
+        } catch (error) {
+            console.error('Error updating task:', error);
+        }
+    } else {
+        // Handle new task creation if needed
+    }
+
+    // Close modal
+    const modal = bootstrap.Modal.getInstance(document.getElementById('task-staticBackdrop'));
+    modal.hide();
 });
 
 // Update the activities fetch function
@@ -570,3 +761,37 @@ document.getElementById('saveNewTaskBtn').addEventListener('click', async functi
         alert(error.message);
     }
 });
+
+document.getElementById('createNewTaskBtn').addEventListener('click', function() {
+    setModalMode('create');
+    const modal = new bootstrap.Modal(document.getElementById('task-staticBackdrop'));
+    modal.show();
+});
+
+// Cancel button handler
+document.getElementById('cancelTaskBtn').addEventListener('click', function() {
+    console.log('Cancel button clicked');
+    resetModalToCreateMode();
+});
+
+// Modal close handler (for X button and clicking outside)
+document.getElementById('task-staticBackdrop').addEventListener('hidden.bs.modal', function () {
+    console.log('Modal hidden - resetting to create mode');
+    resetModalToCreateMode();
+});
+
+// Function to reset modal to create mode
+function resetModalToCreateMode() {
+    const modalTitle = document.querySelector('#task-staticBackdrop .modal-title');
+    const createButton = document.getElementById('createTaskBtn');
+    const updateButton = document.getElementById('updateTaskBtn');
+    
+    // Reset form
+    document.getElementById('newTaskForm').reset();
+    
+    // Reset buttons and title
+    modalTitle.textContent = 'Add New Task';
+    createButton.style.display = 'block';
+    updateButton.style.display = 'none';
+    updateButton.removeAttribute('data-task-id');
+}

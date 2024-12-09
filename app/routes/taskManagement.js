@@ -6,10 +6,19 @@ const db = require('../db');
 router.get('/', async (req, res) => {
     try {
         const userId = req.query.userId;
+        console.log('Fetching tasks for user:', userId);
+
+        if (!userId) {
+            console.log('No userId provided');
+            return res.status(400).json({ error: 'userId is required' });
+        }
+
         const [tasks] = await db.execute(
             'SELECT * FROM tasks WHERE user_id_ = ?',
             [userId]
         );
+
+        console.log('Found tasks:', tasks);
         res.json(tasks);
     } catch (error) {
         console.error('Error fetching tasks:', error);
