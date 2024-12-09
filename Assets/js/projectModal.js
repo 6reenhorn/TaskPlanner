@@ -222,22 +222,28 @@ document.addEventListener('DOMContentLoaded', function() {
     // Choose Task Button Handler
     document.getElementById('chooseTaskBtn').addEventListener('click', async function() {
         try {
-            const response = await fetch('http://localhost:4000/api/tasks');
+            const user = JSON.parse(sessionStorage.getItem('user'));
+            if (!user || !user.id) {
+                console.error('No user found in session');
+                return;
+            }
+
+            const response = await fetch(`${BASE_URL}/tasks?userId=${user.id}`, {
+                credentials: 'include'
+            });
+
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
+
             const tasks = await response.json();
-            
-            // Create and show task selection modal
-            const taskSelectionHTML = createTaskSelectionModal(tasks);
-            document.body.insertAdjacentHTML('beforeend', taskSelectionHTML);
-            
-            const selectionModal = new bootstrap.Modal(document.getElementById('taskSelectionModal'));
-            selectionModal.show();
-            
+            console.log('Fetched tasks:', tasks);
+
+            populateTaskSelectionModal(tasks);
+
         } catch (error) {
             console.error('Error fetching tasks:', error);
-            alert('Error loading tasks. Please try again.');
+            alert('Failed to fetch tasks');
         }
     });
 });
@@ -306,15 +312,16 @@ function createProjectCard(project) {
                 <li>End Date: <span>${endDate}</span></li>
                 <li>Status: <span>${project.project_status}</span></li>
             </ul>
-            <div class="d-flex gap-2">
-                <button type="button" class="card-btn-group project-btn-edit">Edit</button>
-                <button type="button" class="card-btn-group project-btn-delete">Delete</button>
-                <button type="button" class="card-btn-group project-btn-tasks">Tasks</button>
-            </div>
             <div class="d-flex align-items-end gap-5">
                 <div class="col-auto project-card-description">
                     <p class="card-description-text">${project.project_description || ''}</p>
                 </div>
+            </div>
+            <div class="d-flex mt-3 justify-content-between">
+                <button type="button" class="card-btn-group project-btn-edit">Edit</button>
+                <button type="button" class="card-btn-group project-btn-delete">Delete</button>
+                <button type="button" class="card-btn-group project-btn-comment">Comment</button>
+                <button type="button" class="card-btn-group project-btn-view-details">View Details</button>
             </div>
         </div>
     `;
@@ -496,3 +503,139 @@ window.addSelectedTasks = async function() {
         this.remove();
     });
 };
+
+// Function to initialize a new project
+function initializeNewProject() {
+    console.log('Initializing new project');
+    
+    // Clear the task list
+    document.getElementById('taskContainer').innerHTML = '';
+    
+    // Clear tasks from session storage
+    sessionStorage.removeItem('tasks');
+    
+    // Reset any other project-related states
+    // ...
+}
+
+// Call this function when starting a new project
+document.getElementById('newProjectBtn').addEventListener('click', function() {
+    initializeNewProject();
+});
+
+// Function to add a task to the project
+function addTaskToProject(task) {
+    console.log('Adding task to project:', task);
+    
+    // Add task to the task container
+    const taskContainer = document.getElementById('taskContainer');
+    const taskElement = document.createElement('div');
+    taskElement.className = 'task-item';
+    taskElement.textContent = task.task_title;
+    taskContainer.appendChild(taskElement);
+    
+    // Store task in session storage
+    let tasks = JSON.parse(sessionStorage.getItem('tasks')) || [];
+    tasks.push(task);
+    sessionStorage.setItem('tasks', JSON.stringify(tasks));
+}
+
+// Function to fetch tasks from the server
+async function fetchTasks() {
+    try {
+        const response = await fetch(`${BASE_URL}/tasks`, {
+            credentials: 'include'
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const tasks = await response.json();
+        console.log('Fetched tasks:', tasks);
+        
+        // Update the task list
+        tasks.forEach(addTaskToProject);
+        
+    } catch (error) {
+        console.error('Error fetching tasks:', error);
+        alert('Failed to fetch tasks');
+    }
+}
+
+// Function to fetch tasks for the current user
+async function fetchTasksForUser() {
+    try {
+        const user = JSON.parse(sessionStorage.getItem('user'));
+        if (!user || !user.id) {
+            console.error('No user found in session');
+            return;
+        }
+
+        const response = await fetch(`${BASE_URL}/tasks?userId=${user.id}`, {
+            credentials: 'include'
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const tasks = await response.json();
+        console.log('Fetched tasks:', tasks);
+
+        // Update the task list
+        tasks.forEach(addTaskToProject);
+
+    } catch (error) {
+        console.error('Error fetching tasks:', error);
+        alert('Failed to fetch tasks');
+    }
+}
+
+// Call this function when you need to display existing tasks
+document.getElementById('chooseTaskBtn').addEventListener('click', function() {
+    fetchTasksForUser();
+});
+
+// Function to populate the task selection modal
+function populateTaskSelectionModal(tasks) {
+    const taskList = document.getElementById('taskList');
+    taskList.innerHTML = ''; // Clear existing tasks
+
+    tasks.forEach(task => {
+        const listItem = document.createElement('li');
+        listItem.className = 'list-group-item';
+
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.value = task.task_id_;
+        checkbox.className = 'form-check-input me-1';
+
+        const label = document.createElement('label');
+        label.className = 'form-check-label';
+        label.textContent = task.task_title;
+
+        listItem.appendChild(checkbox);
+        listItem.appendChild(label);
+        taskList.appendChild(listItem);
+    });
+
+    // Show the modal
+    const modal = new bootstrap.Modal(document.getElementById('taskSelectionModal'));
+    modal.show();
+}
+
+// Handle adding selected tasks
+document.getElementById('addSelectedTasksBtn').addEventListener('click', function() {
+    const selectedTasks = [];
+    document.querySelectorAll('#taskList input[type="checkbox"]:checked').forEach(checkbox => {
+        selectedTasks.push(checkbox.value);
+    });
+
+    console.log('Selected tasks:', selectedTasks);
+    // Add logic to handle selected tasks, e.g., add them to the project
+
+    // Hide the modal after selection
+    const modal = bootstrap.Modal.getInstance(document.getElementById('taskSelectionModal'));
+    modal.hide();
+});
