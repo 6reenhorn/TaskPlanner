@@ -298,3 +298,28 @@
     transition: ease-in all 0.2s;
 }
 
+/* Collaboration Modal */
+.collaboration-custom-modal {
+    width: 400px;
+    position: fixed;
+    top: 7%;
+    left: 37%;
+}
+
+.collaboration-custom-modal .card-btn-group {
+    border: 2px solid var(--bg-color-1);
+    color: var(--primary-color);
+    font-size: 10px;
+    font-weight: 600;
+    width: 150px;
+    background-color: transparent;
+    border-radius: 5px;
+    padding: 5px 0 5px 0;
+}
+
+.collaboration-custom-modal .card-btn-group:hover {
+    border: 2px solid var(--accent-color-3);
+    color: var(--accent-color-3);
+    background: var(--bg-color-1);
+    transition: ease-in all 0.2s;
+}

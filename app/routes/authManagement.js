@@ -12,18 +12,18 @@ router.get('/test', (req, res) => {
 router.post('/login', async (req, res) => {
     try {
         console.log('Received login request:', req.body);
-        const { username, password } = req.body;
+        const { email, password } = req.body;
         
-        if (!username || !password) {
+        if (!email || !password) {
             return res.status(400).json({ error: 'Email and password are required' });
         }
 
-        console.log('Attempting login for user:', username);
+        console.log('Attempting login for user:', email);
 
-        // First, find user by email only
+        // Find user by email
         const [users] = await db.execute(
             'SELECT * FROM users WHERE user_email = ?',
-            [username]
+            [email]
         );
 
         console.log('Query result:', users);
@@ -43,12 +43,12 @@ router.post('/login', async (req, res) => {
             return res.status(401).json({ error: 'Invalid credentials' });
         }
 
-        console.log('Login successful for user:', username);
+        console.log('Login successful for user:', email);
         
         res.json({ 
             message: 'Login successful',
             user: {
-                id: user.user_id_,
+                user_id_: user.user_id_,
                 firstName: user.first_name,
                 lastName: user.last_name,
                 username: user.username,
@@ -102,6 +102,19 @@ router.post('/signup', async (req, res) => {
     } catch (err) {
         console.error('Signup error:', err);
         res.status(500).json({ error: 'Signup failed' });
+    }
+});
+
+// Add this route for testing
+router.get('/users', async (req, res) => {
+    console.log('GET /api/auth/users hit');
+    try {
+        const [users] = await db.execute('SELECT user_id_, username, user_email FROM users LIMIT 1');
+        console.log('Users fetched:', users);
+        res.json(users);
+    } catch (error) {
+        console.error('Error fetching users:', error);
+        res.status(500).json({ error: 'Failed to fetch users' });
     }
 });
 

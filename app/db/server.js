@@ -1,11 +1,12 @@
 const express = require('express');
 const cors = require('cors');
-const db = require('../db');  // Point directly to db.js in app folder
+const db = require('../db');  // This is correct
 const taskRoutes = require('../routes/taskManagement');
 const projectRoutes = require('../routes/projectManagement');
 const authRoutes = require('../routes/authManagement');
 const projectTaskRoutes = require('../routes/projectTaskManagement');
 const activityRoutes = require('../routes/activityManagement');
+const collaborationRoutes = require('../routes/collaborationManagement');
 
 const app = express();
 
@@ -37,6 +38,7 @@ app.use('/api/projects', projectRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/project-tasks', projectTaskRoutes);
 app.use('/api/activities', activityRoutes);
+app.use('/api/project-collaborations', collaborationRoutes);
 
 // Error handler
 app.use((err, req, res, next) => {

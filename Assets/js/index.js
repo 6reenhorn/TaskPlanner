@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     // Check if user is logged in
     const user = sessionStorage.getItem('user');
     if (!user) {
@@ -14,6 +14,10 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelector('.user-profile-username').textContent = userData.username;
     document.querySelector('.user-profile-fullname').textContent = `${userData.firstName} ${userData.lastName}`;
     document.querySelector('.user-profile-email').textContent = userData.email;
+
+    // Fetch and display collaborations
+    await fetchAndDisplayCollaborations();
+    console.log('Collaborations fetched and displayed');
 
     // Logout functionality
     const logoutButton = document.getElementById('logoutButton');

@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     'Accept': 'application/json'
                 },
                 credentials: 'include',
-                body: JSON.stringify({ username: email, password })
+                body: JSON.stringify({ email, password })
             });
 
             console.log('Response status:', response.status);
