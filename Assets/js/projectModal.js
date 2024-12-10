@@ -201,6 +201,21 @@ document.addEventListener('DOMContentLoaded', function() {
             // Clear stored tasks
             sessionStorage.removeItem('pendingProjectTasks');
 
+            // Reset all forms and containers
+            const projectForm = document.getElementById('newProjectForm');
+            const initialTaskForm = document.getElementById('addInitialTaskForm');
+            const taskAddedContainer = document.querySelector('.task-added-container');
+
+            // Reset forms if they exist
+            if (projectForm) projectForm.reset();
+            if (initialTaskForm) initialTaskForm.reset();
+
+            // Clear the task container
+            if (taskAddedContainer) taskAddedContainer.innerHTML = '';
+
+            // Clear any stored tasks
+            sessionStorage.removeItem('pendingProjectTasks');
+
             // Close modal and clean up
             const modal = bootstrap.Modal.getInstance(document.getElementById('project-staticBackdrop'));
             if (modal) {
