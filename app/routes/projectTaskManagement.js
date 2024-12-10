@@ -39,4 +39,21 @@ router.post('/', async (req, res) => {
     }
 });
 
+// Get tasks for a specific project
+router.get('/:projectId', async (req, res) => {
+    try {
+        const [tasks] = await db.execute(`
+            SELECT t.* 
+            FROM tasks t
+            JOIN project_task_assignment pta ON t.task_id_ = pta.task_id_
+            WHERE pta.project_id_ = ?
+        `, [req.params.projectId]);
+
+        res.json(tasks);
+    } catch (error) {
+        console.error('Error fetching project tasks:', error);
+        res.status(500).json({ error: 'Failed to fetch project tasks' });
+    }
+});
+
 module.exports = router; 

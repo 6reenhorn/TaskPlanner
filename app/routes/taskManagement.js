@@ -26,53 +26,87 @@ router.get('/', async (req, res) => {
     }
 });
 
-// POST new task
+// POST new task or associate existing tasks
 router.post('/', async (req, res) => {
     try {
-        console.log('Received task data:', req.body);
-
-        const { task_title, task_description, task_due_date, task_priority, user_id_ } = req.body;
+        console.log('Raw request body:', req.body);
+        console.log('Content-Type:', req.headers['content-type']);
         
-        // Validate required fields
-        if (!task_title || !task_due_date || !user_id_) {
-            return res.status(400).json({ 
-                error: 'Missing required fields',
-                details: {
-                    title: !task_title ? 'Task title is required' : null,
-                    dueDate: !task_due_date ? 'Due date is required' : null,
-                    userId: !user_id_ ? 'User ID is required' : null
-                }
-            });
+        // Basic request validation
+        if (!req.body || Object.keys(req.body).length === 0) {
+            console.log('Empty request body received');
+            return res.status(400).json({ error: 'No task data provided' });
         }
 
-        // Format the date properly for MySQL
-        const formattedDueDate = new Date(task_due_date).toISOString().split('T')[0];
+        let taskToProcess;
+        if (req.body.tasks) {
+            // For project tasks (multiple)
+            console.log('Processing multiple tasks');
+            taskToProcess = req.body.tasks;
+        } else {
+            // For single task creation
+            console.log('Processing single task');
+            taskToProcess = [req.body];
+        }
 
-        const [result] = await db.execute(
-            'INSERT INTO tasks (task_title, task_description, task_due_date, task_priority, user_id_) VALUES (?, ?, ?, ?, ?)',
-            [
-                task_title,
-                task_description || null,
-                formattedDueDate,
-                task_priority || 'low',
-                user_id_
-            ]
-        );
+        console.log('Tasks to process:', taskToProcess);
 
-        console.log('Database result:', result);
+        if (!Array.isArray(taskToProcess) || taskToProcess.length === 0) {
+            console.log('Invalid task data structure');
+            return res.status(400).json({ error: 'Invalid task data structure' });
+        }
 
-        // Fetch the created task to return it
-        const [newTask] = await db.execute(
-            'SELECT * FROM tasks WHERE task_id_ = ?',
-            [result.insertId]
-        );
+        const results = [];
+        for (const task of taskToProcess) {
+            // Validate task data
+            if (!task.task_title || !task.task_due_date || !task.user_id_) {
+                console.log('Invalid task data:', task);
+                return res.status(400).json({ 
+                    error: 'Missing required fields',
+                    details: {
+                        title: !task.task_title ? 'Task title is required' : null,
+                        dueDate: !task.task_due_date ? 'Due date is required' : null,
+                        userId: !task.user_id_ ? 'User ID is required' : null
+                    }
+                });
+            }
 
-        res.status(201).json(newTask[0]);
+            // Format date
+            const formattedDueDate = new Date(task.task_due_date).toISOString().split('T')[0];
+
+            // Insert task
+            const [result] = await db.execute(
+                'INSERT INTO tasks (task_title, task_description, task_due_date, task_priority, user_id_) VALUES (?, ?, ?, ?, ?)',
+                [
+                    task.task_title,
+                    task.task_description || null,
+                    formattedDueDate,
+                    task.task_priority || 'low',
+                    task.user_id_
+                ]
+            );
+
+            console.log('Insert result:', result);
+
+            // Get created task
+            const [newTask] = await db.execute(
+                'SELECT * FROM tasks WHERE task_id_ = ?',
+                [result.insertId]
+            );
+
+            console.log('Created task:', newTask[0]);
+            results.push(newTask[0]);
+        }
+
+        // Send response
+        const response = taskToProcess.length === 1 ? results[0] : { success: true, results };
+        console.log('Sending response:', response);
+        res.status(201).json(response);
 
     } catch (err) {
-        console.error('Detailed error:', err);
+        console.error('Error processing task:', err);
         res.status(500).json({ 
-            error: 'Failed to create task',
+            error: 'Failed to process tasks',
             details: err.message 
         });
     }

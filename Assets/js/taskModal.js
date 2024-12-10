@@ -1,15 +1,23 @@
 const BASE_URL = 'http://localhost:4000/api';
 
-fetch('http://localhost:4000/tasks')
-    .then(response => response.json())
+fetch(`${BASE_URL}/tasks`)
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
     .then(tasks => {
-        console.log('Tasks from server:', tasks); // See what we're getting
+        console.log('Tasks from server:', tasks);
         tasks.forEach(task => {
-            console.log('Task data:', task); // Look at each task's structure
-            console.log('Task ID:', task.task_id_); // Specifically check the ID
+            console.log('Task data:', task);
+            console.log('Task ID:', task.task_id_);
         });
     })
-    .catch(err => console.error('Error fetching tasks:', err));
+    .catch(err => {
+        console.error('Error fetching tasks:', err);
+        // Handle the error appropriately
+    });
 
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM loaded');
@@ -609,395 +617,232 @@ document.getElementById('updateTaskBtn').addEventListener('click', async functio
     }
 });
 
-// Modify the create task button handler
-document.getElementById('createTaskBtn').addEventListener('click', async function(e) {
-    e.preventDefault(); // Prevent form submission if any
-    console.log('Create button clicked');
-    
+// Standalone task creation function for the task management modal
+async function handleStandaloneTaskCreation(taskData) {
     try {
-        const user = JSON.parse(sessionStorage.getItem('user'));
-        if (!user || !user.id) {
-            console.error('No user found in session');
-            return;
-        }
-        
-        const taskData = {
-            task_title: document.getElementById('taskTitle').value.trim(),
-            task_description: document.getElementById('description').value.trim(),
-            task_due_date: document.getElementById('dueDate').value,
-            task_priority: document.getElementById('priority').value,
-            user_id_: user.id
-        };
-
-        console.log('Creating task with data:', taskData);
+        // Debug logs
+        console.log('Task data before sending:', taskData);
+        console.log('Request body:', JSON.stringify({ 
+            task_title: taskData.task_title,
+            task_description: taskData.task_description,
+            task_due_date: taskData.task_due_date,
+            task_priority: taskData.task_priority,
+            user_id_: taskData.user_id_
+        }));
 
         const response = await fetch(`${BASE_URL}/tasks`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
             },
             credentials: 'include',
-            body: JSON.stringify(taskData)
+            body: JSON.stringify(taskData) // Send taskData directly
         });
 
         console.log('Response status:', response.status);
+        
+        // Log the actual response body for debugging
+        const responseText = await response.text();
+        console.log('Response body:', responseText);
+
+        // Parse the response only if it's JSON
+        let responseData;
+        try {
+            responseData = JSON.parse(responseText);
+        } catch (e) {
+            throw new Error(`Server response: ${responseText}`);
+        }
 
         if (!response.ok) {
-            throw new Error(`Failed to create task: ${response.status}`);
+            throw new Error(responseData.error || 'Failed to create task');
         }
 
-        const result = await response.json();
-        console.log('Task created:', result);
-
-        const modal = bootstrap.Modal.getInstance(document.getElementById('task-staticBackdrop'));
-        modal.hide();
-        
-        await fetchAndDisplayTasks();
-        console.log('Task created successfully');
-
+        return responseData;
     } catch (error) {
-        console.error('Error creating task:', error);
-        alert(error.message);
-    } finally {
-        // Close modal and reset to create mode
-        const modalElement = document.getElementById('task-staticBackdrop');
-        const modal = bootstrap.Modal.getInstance(modalElement);
-        console.log('Modal instance:', modal);
-        if (modal) {
-            modal.hide();
-            console.log('Modal hidden');
-        }
-        resetModalToCreateMode();
+        console.error('Detailed error:', error);
+        throw error;
     }
-});
+}
 
-// Add save button click handler for updating task
-document.getElementById('saveNewTaskBtn').addEventListener('click', async function() {
-    const taskId = this.getAttribute('data-task-id');
-    const taskTitle = document.getElementById('taskTitle').value;
-    const dueDate = document.getElementById('dueDate').value;
-    const priority = document.getElementById('priority').value;
-    const description = document.getElementById('description').value;
+// Single event listener for create task button
+function initializeTaskModal() {
+    const createTaskBtn = document.getElementById('createTaskBtn');
+    const updateTaskBtn = document.getElementById('updateTaskBtn');
+    const cancelTaskBtn = document.getElementById('cancelTaskBtn');
+    const modalElement = document.getElementById('task-staticBackdrop');
+    const form = document.getElementById('newTaskForm');
 
-    if (taskId) {
-        // Update existing task
+    // Remove any existing listeners
+    createTaskBtn?.replaceWith(createTaskBtn.cloneNode(true));
+    updateTaskBtn?.replaceWith(updateTaskBtn.cloneNode(true));
+    cancelTaskBtn?.replaceWith(cancelTaskBtn.cloneNode(true));
+
+    // Get fresh references after replacing
+    const newCreateBtn = document.getElementById('createTaskBtn');
+    const newUpdateBtn = document.getElementById('updateTaskBtn');
+    const newCancelBtn = document.getElementById('cancelTaskBtn');
+
+    // Single create task listener
+    newCreateBtn?.addEventListener('click', async function(e) {
+        e.preventDefault();
+        this.disabled = true;
+
         try {
-            const response = await fetch(`${BASE_URL}/tasks/${taskId}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    task_title: taskTitle,
-                    task_due_date: dueDate,
-                    task_priority: priority,
-                    task_description: description
-                })
+            const formData = {
+                task_title: document.getElementById('taskTitle').value.trim(),
+                task_description: document.getElementById('description').value.trim(),
+                task_due_date: document.getElementById('dueDate').value,
+                task_priority: document.getElementById('priority').value,
+                user_id_: JSON.parse(sessionStorage.getItem('user'))?.id
+            };
+
+            const response = await fetch(`${BASE_URL}/tasks`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify(formData)
             });
 
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+            if (!response.ok) throw new Error('Failed to create task');
+
+            const result = await response.json();
+            console.log('Task created:', result);
+
+            // Close modal
+            const modal = bootstrap.Modal.getInstance(modalElement);
+            if (modal) {
+                modal.hide();
+                // Clean up modal artifacts
+                setTimeout(() => {
+                    document.body.classList.remove('modal-open');
+                    document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+                    document.body.style.overflow = '';
+                    document.body.style.paddingRight = '';
+                }, 150);
             }
 
-            console.log('Task updated successfully');
-            // Refresh tasks
+            form.reset();
             await fetchAndDisplayTasks();
+            alert('Task created successfully!');
+
+        } catch (error) {
+            console.error('Error creating task:', error);
+            alert(error.message);
+        } finally {
+            this.disabled = false;
+        }
+    });
+
+    // Modal hidden event
+    modalElement?.addEventListener('hidden.bs.modal', function() {
+        form.reset();
+        newCreateBtn.style.display = 'block';
+        newUpdateBtn.style.display = 'none';
+        newUpdateBtn.removeAttribute('data-task-id');
+        this.querySelector('.modal-title').textContent = 'Add New Task';
+    });
+
+    // Update task button handler
+    newUpdateBtn?.addEventListener('click', async function(e) {
+        e.preventDefault();
+        this.disabled = true;
+
+        try {
+            const taskId = this.getAttribute('data-task-id');
+            if (!taskId) throw new Error('No task ID found');
+
+            const formData = {
+                task_title: document.getElementById('taskTitle').value.trim(),
+                task_description: document.getElementById('description').value.trim(),
+                task_due_date: document.getElementById('dueDate').value,
+                task_priority: document.getElementById('priority').value,
+                user_id_: JSON.parse(sessionStorage.getItem('user'))?.id
+            };
+
+            console.log('Updating task:', taskId, formData);
+
+            const response = await fetch(`${BASE_URL}/tasks/${taskId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify(formData)
+            });
+
+            if (!response.ok) throw new Error('Failed to update task');
+
+            const result = await response.json();
+            console.log('Task updated:', result);
+
+            // Close modal
+            const modalElement = document.getElementById('task-staticBackdrop');
+            const modal = bootstrap.Modal.getInstance(modalElement);
+            if (modal) {
+                modal.hide();
+                // Clean up modal artifacts
+                setTimeout(() => {
+                    document.body.classList.remove('modal-open');
+                    document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+                    document.body.style.overflow = '';
+                    document.body.style.paddingRight = '';
+                }, 150);
+            }
+
+            // Reset form and refresh tasks
+            document.getElementById('newTaskForm').reset();
+            await fetchAndDisplayTasks();
+            alert('Task updated successfully!');
+
         } catch (error) {
             console.error('Error updating task:', error);
+            alert(error.message);
+        } finally {
+            this.disabled = false;
         }
-    } else {
-        // Handle new task creation if needed
-    }
+    });
 
-    // Close modal
-    const modal = bootstrap.Modal.getInstance(document.getElementById('task-staticBackdrop'));
-    modal.hide();
-});
-
-// Update the activities fetch function
-async function fetchActivities() {
-    return [];
-}
-
-// Create New Task Save Button Handler (for Task Management page)
-document.getElementById('saveNewTaskBtn').addEventListener('click', async function() {
-    try {
-        const user = JSON.parse(sessionStorage.getItem('user'));
+    // Edit button click handler (for task cards)
+    document.addEventListener('click', function(e) {
+        if (!e.target.classList.contains('task-btn-edit')) return;
         
+        const taskCard = e.target.closest('.card');
+        if (!taskCard) return;
+
+        const taskId = taskCard.getAttribute('data-task-id');
+        console.log('Editing task:', taskId);
+
+        // Get task data from the card
         const taskData = {
-            task_title: document.getElementById('taskTitle').value.trim(),
-            task_description: document.getElementById('description').value.trim(),
-            task_due_date: document.getElementById('dueDate').value,
-            task_priority: document.getElementById('priority').value,
-            user_id_: user.id
+            task_id_: taskId,
+            task_title: taskCard.querySelector('.card-header').textContent.trim(),
+            task_due_date: new Date(taskCard.querySelector('li:first-child span').textContent).toISOString().split('T')[0],
+            task_priority: taskCard.querySelector('li:nth-child(3) span').textContent.toLowerCase(),
+            task_description: taskCard.querySelector('.card-description-text')?.textContent.trim() || ''
         };
 
-        const response = await fetch(`${BASE_URL}/tasks`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            credentials: 'include',
-            body: JSON.stringify(taskData)
-        });
+        // Fill modal with task data
+        document.getElementById('taskTitle').value = taskData.task_title;
+        document.getElementById('dueDate').value = taskData.task_due_date;
+        document.getElementById('priority').value = taskData.task_priority;
+        document.getElementById('description').value = taskData.task_description;
 
-        if (!response.ok) {
-            throw new Error('Failed to create task');
-        }
+        // Show update button, hide create button
+        document.getElementById('createTaskBtn').style.display = 'none';
+        const updateBtn = document.getElementById('updateTaskBtn');
+        updateBtn.style.display = 'block';
+        updateBtn.setAttribute('data-task-id', taskId);
 
-        // Close the modal using Bootstrap's modal method
-        const modal = document.getElementById('task-staticBackdrop');
-        const modalInstance = bootstrap.Modal.getInstance(modal);
-        if (modalInstance) {
-            modalInstance.hide();
-        } else {
-            // Fallback if getInstance doesn't work
-            const newModal = new bootstrap.Modal(modal);
-            newModal.hide();
-        }
+        // Update modal title
+        document.querySelector('#task-staticBackdrop .modal-title').textContent = 'Edit Task';
 
-        // Refresh task list
-        await fetchAndDisplayTasks();
-
-        alert('Task saved successfully!');
-
-    } catch (error) {
-        console.error('Error saving task:', error);
-        alert(error.message);
-    }
-});
-
-document.getElementById('createNewTaskBtn').addEventListener('click', function() {
-    setModalMode('create');
-    const modal = new bootstrap.Modal(document.getElementById('task-staticBackdrop'));
-    modal.show();
-});
-
-// Cancel button handler
-document.getElementById('cancelTaskBtn').addEventListener('click', function() {
-    console.log('Cancel button clicked');
-    resetModalToCreateMode();
-});
-
-// X button handler (btn-close class)
-document.querySelector('.btn-close').addEventListener('click', function() {
-    console.log('X button clicked');
-    resetModalToCreateMode();
-});
-
-// Modal close handler (using the correct modal class)
-document.querySelector('.new-task-modal').addEventListener('hidden.bs.modal', function () {
-    console.log('Modal hidden - resetting to create mode');
-    resetModalToCreateMode();
-});
-
-// Function to reset modal to create mode
-function resetModalToCreateMode() {
-    const modalTitle = document.querySelector('#task-staticBackdrop .modal-title');
-    const createButton = document.getElementById('createTaskBtn');
-    const updateButton = document.getElementById('updateTaskBtn');
-    
-    // Reset form
-    document.getElementById('newTaskForm').reset();
-    
-    // Reset buttons and title
-    modalTitle.textContent = 'Add New Task';
-    createButton.style.display = 'block';
-    updateButton.style.display = 'none';
-    updateButton.removeAttribute('data-task-id');
+        // Show modal
+        const modal = new bootstrap.Modal(document.getElementById('task-staticBackdrop'));
+        modal.show();
+    });
 }
 
-// Ensure the DOM is fully loaded before attaching event listeners
+// Initialize once when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
-    // Cancel button handler
-    document.getElementById('cancelTaskBtn').addEventListener('click', function() {
-        console.log('Cancel button clicked');
-        resetModalToCreateMode();
-    });
-
-    // X button handler (btn-close class)
-    document.querySelector('.btn-close').addEventListener('click', function() {
-        console.log('X button clicked');
-        resetModalToCreateMode();
-    });
-
-    // Modal close handler (using the correct modal class)
-    document.querySelector('.new-task-modal').addEventListener('hidden.bs.modal', function () {
-        console.log('Modal hidden - resetting to create mode');
-        resetModalToCreateMode();
-    });
-});
-
-// Create task button handler
-document.getElementById('createTaskBtn').addEventListener('click', async function() {
-    try {
-        const user = JSON.parse(sessionStorage.getItem('user'));
-        if (!user || !user.id) {
-            console.error('No user found in session');
-            return;
-        }
-
-        const taskData = {
-            task_title: document.getElementById('taskTitle').value.trim(),
-            task_description: document.getElementById('description').value.trim(),
-            task_due_date: document.getElementById('dueDate').value,
-            task_priority: document.getElementById('priority').value,
-            user_id_: user.id
-        };
-
-        console.log('Creating task:', taskData);
-
-        const response = await fetch(`${BASE_URL}/tasks`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            credentials: 'include',
-            body: JSON.stringify(taskData)
-        });
-
-        if (!response.ok) {
-            throw new Error(`Failed to create task: ${response.status}`);
-        }
-
-        const result = await response.json();
-        console.log('Task created successfully:', result);
-
-        // Refresh tasks
-        await fetchAndDisplayTasks();
-
-    } catch (error) {
-        console.error('Error creating task:', error);
-        alert(error.message);
-    } finally {
-        // Close modal and reset to create mode
-        const modalElement = document.getElementById('task-staticBackdrop');
-        const modal = bootstrap.Modal.getInstance(modalElement);
-        console.log('Modal instance:', modal);
-        if (modal) {
-            modal.hide();
-            console.log('Modal hidden');
-        }
-        resetModalToCreateMode();
-    }
-});
-
-// New Task button click handler
-document.getElementById('newTaskModal').addEventListener('click', function() {
-    setModalMode('create');
-});
-
-// Create task button handler
-document.getElementById('createTaskBtn').addEventListener('click', async function() {
-    try {
-        const user = JSON.parse(sessionStorage.getItem('user'));
-        if (!user || !user.id) {
-            console.error('No user found in session');
-            return;
-        }
-        
-        const taskData = {
-            task_title: document.getElementById('taskTitle').value.trim(),
-            task_description: document.getElementById('description').value.trim(),
-            task_due_date: document.getElementById('dueDate').value,
-            task_priority: document.getElementById('priority').value,
-            user_id_: user.id
-        };
-
-        const response = await fetch(`${BASE_URL}/tasks`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            credentials: 'include',
-            body: JSON.stringify(taskData)
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to create task');
-        }
-
-        const modal = bootstrap.Modal.getInstance(document.getElementById('task-staticBackdrop'));
-        modal.hide();
-        
-        await fetchAndDisplayTasks();
-        console.log('Task created successfully');
-
-    } catch (error) {
-        console.error('Error creating task:', error);
-        alert(error.message);
-    }
-});
-
-// Update task button handler
-document.getElementById('updateTaskBtn').addEventListener('click', async function() {
-    try {
-        const taskId = this.getAttribute('data-task-id');
-        if (!taskId) {
-            console.error('No task ID found');
-            return;
-        }
-
-        const user = JSON.parse(sessionStorage.getItem('user'));
-        if (!user || !user.id) {
-            console.error('No user found in session');
-            return;
-        }
-
-        const taskData = {
-            task_title: document.getElementById('taskTitle').value.trim(),
-            task_description: document.getElementById('description').value.trim(),
-            task_due_date: document.getElementById('dueDate').value,
-            task_priority: document.getElementById('priority').value,
-            user_id_: user.id
-        };
-
-        console.log('Updating task:', taskData);
-
-        const response = await fetch(`${BASE_URL}/tasks/${taskId}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            credentials: 'include',
-            body: JSON.stringify(taskData)
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to update task');
-        }
-
-        const modal = bootstrap.Modal.getInstance(document.getElementById('task-staticBackdrop'));
-        modal.hide();
-        
-        await fetchAndDisplayTasks();
-        console.log('Task updated successfully');
-
-    } catch (error) {
-        console.error('Error updating task:', error);
-        alert(error.message);
-    } finally {
-        // Close modal and reset to create mode
-        const modalElement = document.getElementById('task-staticBackdrop');
-        const modal = bootstrap.Modal.getInstance(modalElement);
-        console.log('Modal instance:', modal);
-        if (modal) {
-            modal.hide();
-            console.log('Modal hidden');
-        }
-        resetModalToCreateMode();
-    }
-});
-
-// Modal reset handler
-document.getElementById('task-staticBackdrop').addEventListener('hidden.bs.modal', function () {
-    const createButton = document.getElementById('createTaskBtn');
-    const updateButton = document.getElementById('updateTaskBtn');
-    
-    // Reset form and buttons
-    document.getElementById('newTaskForm').reset();
-    createButton.style.display = 'block';
-    updateButton.style.display = 'none';
-    updateButton.removeAttribute('data-task-id');
-    this.querySelector('.modal-title').textContent = 'Add New Task';
-});
+    initializeTaskModal();
+    fetchAndDisplayTasks();
+}, { once: true });

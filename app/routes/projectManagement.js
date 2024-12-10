@@ -2,34 +2,79 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 
+// Create project with initial tasks
 router.post('/', async (req, res) => {
+    const connection = await db.getConnection();
+    
     try {
-        console.log('Raw request body:', req.body);
+        await connection.beginTransaction();
         
-        const { project_title, project_description, project_start_date, project_end_date, project_status, user_id_ } = req.body;
+        console.log('Creating project with data:', req.body);
+        const { 
+            project_title, 
+            project_description, 
+            project_start_date, 
+            project_end_date, 
+            project_status, 
+            user_id_,
+            tasks  // Array of task IDs to associate
+        } = req.body;
         
-        const [result] = await db.execute(
+        // Create project
+        const [projectResult] = await connection.execute(
             'INSERT INTO projects (project_title, project_description, project_start_date, project_end_date, project_status, user_id_) VALUES (?, ?, ?, ?, ?, ?)',
             [project_title, project_description, project_start_date, project_end_date, project_status, user_id_]
         );
 
-        console.log('Database result:', result);
+        const project_id_ = projectResult.insertId;
+        console.log('Created project with ID:', project_id_);
 
-        // Send back just the project ID and success status
+        // Associate tasks if provided
+        if (tasks && tasks.length > 0) {
+            console.log('Associating tasks:', tasks);
+            for (const task of tasks) {
+                await connection.execute(
+                    'INSERT INTO project_task_assignment (project_id_, task_id_, task_assigned_at) VALUES (?, ?, NOW())',
+                    [project_id_, task.task_id_]
+                );
+            }
+        }
+
+        await connection.commit();
+
+        // Fetch the complete project with its tasks
+        const [project] = await connection.execute(
+            'SELECT * FROM projects WHERE project_id_ = ?',
+            [project_id_]
+        );
+
+        const [assignedTasks] = await connection.execute(
+            `SELECT t.*, pta.task_assigned_at 
+             FROM tasks t 
+             JOIN project_task_assignment pta ON t.task_id_ = pta.task_id_ 
+             WHERE pta.project_id_ = ?`,
+            [project_id_]
+        );
+
         const response = {
             success: true,
-            project_id_: result.insertId
+            project: project[0],
+            tasks: assignedTasks
         };
 
         console.log('Sending response:', response);
         res.status(201).json(response);
 
     } catch (error) {
+        await connection.rollback();
         console.error('Error creating project:', error);
         res.status(500).json({ 
             success: false,
-            error: 'Failed to create project'
+            error: 'Failed to create project',
+            details: error.message
         });
+    } finally {
+        connection.release();
     }
 });
 
@@ -74,33 +119,6 @@ router.delete('/:id', async (req, res) => {
         res.status(500).json({ 
             success: false,
             error: 'Failed to delete project',
-            details: error.message 
-        });
-    }
-});
-
-// Add this route to handle project-task associations
-router.post('/:projectId/tasks/:taskId', async (req, res) => {
-    try {
-        const { projectId, taskId } = req.params;
-        console.log(`Creating association between project ${projectId} and task ${taskId}`);
-
-        const [result] = await db.execute(
-            'INSERT INTO project_task_assignment (project_id_, task_id_, task_assigned_at) VALUES (?, ?, NOW())',
-            [projectId, taskId]
-        );
-
-        res.json({ 
-            success: true, 
-            message: 'Task assigned to project successfully',
-            assignment_id: result.insertId 
-        });
-
-    } catch (error) {
-        console.error('Error creating project-task association:', error);
-        res.status(500).json({ 
-            success: false, 
-            error: 'Failed to assign task to project',
             details: error.message 
         });
     }
