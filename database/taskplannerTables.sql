@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS projects (
     FOREIGN KEY (user_id_) REFERENCES users(user_id_)
 );
 
-CREATE TABLE project_collaboration (
+CREATE TABLE IF NOT EXISTS project_collaboration (
     project_collaboration_id_ INT PRIMARY KEY AUTO_INCREMENT,
     project_id_ INT NOT NULL,
     user_id_ INT NOT NULL,
@@ -53,6 +53,18 @@ CREATE TABLE project_collaboration (
     INDEX idx_project (project_id_),
     INDEX idx_user (user_id_)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS project_task_assignment (
+  project_task_id_ INT PRIMARY KEY AUTO_INCREMENT,
+  project_id_ INT NOT NULL,
+  task_id_ INT NOT NULL,
+  task_assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP DEFAULT_GENERATED,
+  FOREIGN KEY (project_id_) REFERENCES projects(project_id_) ON DELETE CASCADE,
+  FOREIGN KEY (task_id_) REFERENCES tasks(task_id_) ON DELETE CASCADE,
+  INDEX idx_project (project_id_),
+  INDEX idx_task (task_id_)
+);
+
 
 -- CREATE TABLE IF NOT EXISTS activity_logs (
 --     activity_log_id_PK INT AUTO_INCREMENT PRIMARY KEY,
