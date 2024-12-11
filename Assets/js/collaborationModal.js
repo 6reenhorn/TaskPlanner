@@ -224,33 +224,95 @@ document.getElementById('collaboration-staticBackdrop').addEventListener('show.b
 
 async function handleDeleteCollaboration(collaborationId) {
     try {
-        if (!confirm('Are you sure you want to delete this collaboration?')) {
-            return;
+        const user = JSON.parse(sessionStorage.getItem('user'));
+        if (!user || !user.user_id_) {
+            throw new Error('User not found or invalid');
         }
 
-        const response = await fetch(`${API_BASE}/project-collaborations/${collaborationId}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            credentials: 'include'
+        // Get the collaboration details to verify ownership
+        const collabResponse = await fetch(`${API_BASE}/project-collaborations/${collaborationId}`);
+        if (!collabResponse.ok) {
+            throw new Error('Failed to fetch collaboration details');
+        }
+        
+        const collaboration = await collabResponse.json();
+        console.log('Collaboration details:', collaboration);
+
+        // Check roles
+        const isSystemAdmin = user.user_role === 'admin';
+        const isCollabAdmin = collaboration.user_collab_role === 'admin';
+        const isCollabCreator = collaboration.user_id_ === user.user_id_ && isCollabAdmin;
+        const canDelete = isSystemAdmin || isCollabCreator;
+
+        console.log('Role checks:', {
+            isSystemAdmin,
+            isCollabAdmin,
+            isCollabCreator,
+            canDelete,
+            userRole: user.user_role,
+            userId: user.user_id_,
+            collabUserId: collaboration.user_id_,
+            collabRole: collaboration.user_collab_role
         });
 
-        if (!response.ok) {
-            throw new Error('Failed to delete collaboration');
-        }
+        if (canDelete) {
+            if (!confirm('Are you sure you want to delete this collaboration for all users?')) {
+                return;
+            }
 
-        // Remove the card from the UI
-        const card = document.querySelector(`[data-collaboration-id="${collaborationId}"]`);
-        if (card) {
-            card.remove();
+            // Delete the entire collaboration with flag for full deletion
+            const response = await fetch(`${API_BASE}/project-collaborations/${collaborationId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-User-Role': user.user_role || 'user',
+                    'X-User-Id': user.user_id_.toString(),
+                    'X-Full-Delete': 'true'  // Add flag for full deletion
+                },
+                credentials: 'include'
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to delete collaboration');
+            }
+
+            alert('Collaboration deleted successfully for all users');
+        } else {
+            // Regular member leaving
+            if (!confirm('Are you sure you want to leave this collaboration?')) {
+                return;
+            }
+
+            // Format the current date for MySQL (YYYY-MM-DD HH:mm:ss)
+            const now = new Date();
+            const formattedDate = now.toISOString().slice(0, 19).replace('T', ' ');
+
+            // Update member status to 'left' instead of using a separate endpoint
+            const response = await fetch(`${API_BASE}/project-collaborations/${collaborationId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify({ 
+                    user_id_: user.user_id_,
+                    action: 'leave',
+                    leave_at: formattedDate
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to leave collaboration');
+            }
+
+            alert('You have left the collaboration successfully');
         }
 
         // Refresh the collaborations display
         await fetchAndDisplayCollaborations();
 
     } catch (error) {
-        console.error('Error deleting collaboration:', error);
-        alert('Failed to delete collaboration. Please try again.');
+        console.error('Error handling collaboration action:', error);
+        alert(error.message || 'Failed to process your request. Please try again.');
     }
 }
