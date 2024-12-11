@@ -266,6 +266,7 @@
     font-size: 0.85rem;
     overflow-y: scroll;
     height: 200px;
+    display: flex;
 }
 
 .task-selection-list .list-group-item {

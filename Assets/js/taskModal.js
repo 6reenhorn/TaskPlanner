@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 task_description: document.getElementById('description').value,
                 task_due_date: document.getElementById('dueDate').value,
                 task_priority: document.getElementById('priority').value,
-                user_id_: user.id
+                user_id_: user.user_id_
             };
 
             console.log('Sending request to:', isEdit ? `http://localhost:4000/api/tasks/${taskId}` : 'http://localhost:4000/api/tasks');
@@ -107,12 +107,12 @@ document.addEventListener('DOMContentLoaded', function() {
 async function fetchAndDisplayTasks() {
     try {
         const user = JSON.parse(sessionStorage.getItem('user'));
-        if (!user || !user.id) {
+        if (!user || !user.user_id_) {
             console.log('No user found in session');
             return;
         }
 
-        const response = await fetch(`${BASE_URL}/tasks?userId=${user.id}`, {
+        const response = await fetch(`${BASE_URL}/tasks?userId=${user.user_id_}`, {
             credentials: 'include'
         });
 
@@ -130,7 +130,7 @@ async function fetchAndDisplayTasks() {
 
             if (Array.isArray(tasks) && tasks.length > 0) {
                 tasks.forEach(task => {
-                    if (task.user_id_ === user.id) {
+                    if (task.user_id_ === user.user_id_) {
                         const taskCard = createTaskCard(task);
                         taskContainer.appendChild(taskCard);
                     }
@@ -144,7 +144,7 @@ async function fetchAndDisplayTasks() {
         const dashboardSection = document.getElementById('dashboard');
         if (dashboardSection && dashboardSection.classList.contains('active')) {
             console.log('Updating dashboard upcoming tasks');
-            updateUpcomingTasks(tasks.filter(task => task.user_id_ === user.id));
+            updateUpcomingTasks(tasks.filter(task => task.user_id_ === user.user_id_));
         }
 
     } catch (error) {
@@ -567,7 +567,7 @@ document.getElementById('updateTaskBtn').addEventListener('click', async functio
         }
 
         const user = JSON.parse(sessionStorage.getItem('user'));
-        if (!user || !user.id) {
+        if (!user || !user.user_id_) {
             console.error('No user found in session');
             return;
         }
@@ -577,7 +577,7 @@ document.getElementById('updateTaskBtn').addEventListener('click', async functio
             task_description: document.getElementById('description').value.trim(),
             task_due_date: document.getElementById('dueDate').value,
             task_priority: document.getElementById('priority').value,
-            user_id_: user.id
+            user_id_: user.user_id_
         };
 
         console.log('Updating task:', taskData);
@@ -608,10 +608,8 @@ document.getElementById('updateTaskBtn').addEventListener('click', async functio
         // Close modal and reset to create mode
         const modalElement = document.getElementById('task-staticBackdrop');
         const modal = bootstrap.Modal.getInstance(modalElement);
-        console.log('Modal instance:', modal);
         if (modal) {
             modal.hide();
-            console.log('Modal hidden');
         }
         resetModalToCreateMode();
     }
@@ -694,7 +692,7 @@ function initializeTaskModal() {
                 task_description: document.getElementById('description').value.trim(),
                 task_due_date: document.getElementById('dueDate').value,
                 task_priority: document.getElementById('priority').value,
-                user_id_: JSON.parse(sessionStorage.getItem('user'))?.id
+                user_id_: JSON.parse(sessionStorage.getItem('user'))?.user_id_
             };
 
             const response = await fetch(`${BASE_URL}/tasks`, {
@@ -757,7 +755,7 @@ function initializeTaskModal() {
                 task_description: document.getElementById('description').value.trim(),
                 task_due_date: document.getElementById('dueDate').value,
                 task_priority: document.getElementById('priority').value,
-                user_id_: JSON.parse(sessionStorage.getItem('user'))?.id
+                user_id_: JSON.parse(sessionStorage.getItem('user'))?.user_id_
             };
 
             console.log('Updating task:', taskId, formData);
@@ -846,3 +844,14 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeTaskModal();
     fetchAndDisplayTasks();
 }, { once: true });
+
+function resetModalToCreateMode() {
+    const modalTitle = document.querySelector('#task-staticBackdrop .modal-title');
+    const createButton = document.getElementById('createTaskBtn');
+    const updateButton = document.getElementById('updateTaskBtn');
+    
+    modalTitle.textContent = 'Add New Task';
+    createButton.style.display = 'block';
+    updateButton.style.display = 'none';
+    document.getElementById('newTaskForm').reset();
+}

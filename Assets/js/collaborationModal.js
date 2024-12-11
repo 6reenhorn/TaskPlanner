@@ -185,11 +185,23 @@ async function fetchAndDisplayCollaborations() {
 async function loadUserProjects() {
     try {
         const user = JSON.parse(sessionStorage.getItem('user'));
-        // Use user.id since that's how it's stored in session
-        const response = await fetch(`${API_BASE}/projects?userId=${user.id}`);
+        if (!user || !user.user_id_) {
+            throw new Error('User not found or invalid');
+        }
+
+        const response = await fetch(`${API_BASE}/projects?userId=${user.user_id_}`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch projects');
+        }
+
         const projects = await response.json();
+        console.log('Loaded projects:', projects);
 
         const projectSelect = document.getElementById('projectSelect');
+        if (!projectSelect) {
+            throw new Error('Project select element not found');
+        }
+
         projectSelect.innerHTML = '<option value="">Choose a project...</option>';
 
         projects.forEach(project => {
@@ -199,10 +211,9 @@ async function loadUserProjects() {
             projectSelect.appendChild(option);
         });
 
-        // Debug log
-        console.log('Loaded projects:', projects);
     } catch (error) {
         console.error('Error loading projects:', error);
+        alert('Failed to load projects: ' + error.message);
     }
 }
 
