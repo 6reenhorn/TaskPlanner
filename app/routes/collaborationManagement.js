@@ -182,9 +182,11 @@ router.delete('/:id', async (req, res) => {
 
         console.log('Delete request:', { collaborationId, userRole, userId, isFullDelete });
 
-        // Get collaboration details
+        // Get collaboration details first
         const [collaborationDetails] = await db.execute(
-            'SELECT pc.project_id_, pc.collaboration_name, pc.user_id_, pc.user_collab_role FROM project_collaboration pc WHERE pc.project_collaboration_id_ = ?',
+            `SELECT pc.project_id_, pc.collaboration_name, pc.user_id_, pc.user_collab_role 
+             FROM project_collaboration pc 
+             WHERE pc.project_collaboration_id_ = ?`,
             [collaborationId]
         );
 
@@ -207,9 +209,16 @@ router.delete('/:id', async (req, res) => {
         if (isFullDelete) {
             // Delete all related collaboration entries for full deletion
             [result] = await db.execute(
-                'DELETE FROM project_collaboration WHERE project_id_ = ? AND collaboration_name = ?',
+                `DELETE FROM project_collaboration 
+                 WHERE project_id_ = ? AND collaboration_name = ?`,
                 [collaboration.project_id_, collaboration.collaboration_name]
             );
+
+            console.log('Full delete result:', {
+                projectId: collaboration.project_id_,
+                collaborationName: collaboration.collaboration_name,
+                affectedRows: result.affectedRows
+            });
         } else {
             // Delete only the specific collaboration entry
             [result] = await db.execute(
@@ -218,12 +227,9 @@ router.delete('/:id', async (req, res) => {
             );
         }
 
-        console.log('Delete result:', {
-            projectId: collaboration.project_id_,
-            collaborationName: collaboration.collaboration_name,
-            affectedRows: result.affectedRows,
-            isFullDelete
-        });
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'No collaborations were deleted' });
+        }
 
         res.json({ 
             message: isFullDelete ? 'Collaboration deleted for all users' : 'Collaboration deleted',
@@ -232,7 +238,10 @@ router.delete('/:id', async (req, res) => {
 
     } catch (error) {
         console.error('Error deleting collaboration:', error);
-        res.status(500).json({ error: 'Failed to delete collaboration' });
+        res.status(500).json({ 
+            error: 'Failed to delete collaboration',
+            details: error.message
+        });
     }
 });
 

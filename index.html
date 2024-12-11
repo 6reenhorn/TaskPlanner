@@ -581,11 +581,89 @@
         </div>
     </div>
 
+    <!-- Collaboration Details Modal -->
+    <div class="modal fade" id="collaborationDetailsModal" tabindex="-1" aria-labelledby="collaborationDetailsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="collaborationDetailsModalLabel">Collaboration Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Collaboration Info -->
+                    <div class="collaboration-info mb-4">
+                        <h3 id="collaborationTitle"></h3>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted" id="collaborationEndDate"></span>
+                            <span class="badge" id="collaborationStatus"></span>
+                        </div>
+                    </div>
+
+                    <!-- Team Members Section -->
+                    <div class="team-members-section mb-4">
+                        <h5>Team Members</h5>
+                        <div class="team-members-container" style="max-height: 200px; overflow-y: auto;">
+                            <div class="list-group" id="teamMembersList">
+                                <!-- Team members will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tasks Section -->
+                    <div class="tasks-section">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5>Tasks</h5>
+                            <button class="btn btn-primary btn-sm" id="assignTaskBtn">Assign Task</button>
+                        </div>
+                        <div class="tasks-container" style="max-height: 300px; overflow-y: auto;">
+                            <div class="row" id="tasksGrid">
+                                <!-- Tasks will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Task Assignment Modal -->
+    <div class="modal fade" id="taskAssignmentModal" tabindex="-1" aria-labelledby="taskAssignmentModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="taskAssignmentModalLabel">Assign Task</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="taskAssignmentForm">
+                        <div class="mb-3">
+                            <label for="taskSelect" class="form-label">Select Task</label>
+                            <select class="form-select" id="taskSelect" required>
+                                <!-- Tasks will be populated here -->
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="memberSelect" class="form-label">Assign To</label>
+                            <select class="form-select" id="memberSelect" required>
+                                <!-- Team members will be populated here -->
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="confirmAssignTask">Assign</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="./Assets/js/navigation.js"></script>
     <script src="./Assets/js/taskModal.js"></script>
     <script src="./Assets/js/projectModal.js"></script>
     <script src="./Assets/js/collaborationModal.js"></script>
+    <script src="./Assets/js/collaborationDetailsModal.js"></script>
     <script src="./Assets/js/index.js"></script>
 </body>
 </html>

@@ -256,7 +256,8 @@ async function handleDeleteCollaboration(collaborationId) {
                 headers: {
                     'Content-Type': 'application/json',
                     'X-User-Role': user.user_role || 'user',
-                    'X-User-Id': user.user_id_.toString()
+                    'X-User-Id': user.user_id_.toString(),
+                    'X-Full-Delete': 'true'
                 },
                 credentials: 'include'
             });
