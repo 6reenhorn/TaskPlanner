@@ -244,75 +244,66 @@ async function handleDeleteCollaboration(collaborationId) {
         const isCollabCreator = collaboration.user_id_ === user.user_id_ && isCollabAdmin;
         const canDelete = isSystemAdmin || isCollabCreator;
 
-        console.log('Role checks:', {
-            isSystemAdmin,
-            isCollabAdmin,
-            isCollabCreator,
-            canDelete,
-            userRole: user.user_role,
-            userId: user.user_id_,
-            collabUserId: collaboration.user_id_,
-            collabRole: collaboration.user_collab_role
-        });
+        let response;
 
         if (canDelete) {
             if (!confirm('Are you sure you want to delete this collaboration for all users?')) {
                 return;
             }
 
-            // Delete the entire collaboration with flag for full deletion
-            const response = await fetch(`${API_BASE}/project-collaborations/${collaborationId}`, {
+            response = await fetch(`${API_BASE}/project-collaborations/${collaborationId}`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-User-Role': user.user_role || 'user',
-                    'X-User-Id': user.user_id_.toString(),
-                    'X-Full-Delete': 'true'  // Add flag for full deletion
+                    'X-User-Id': user.user_id_.toString()
                 },
                 credentials: 'include'
             });
-
-            if (!response.ok) {
-                throw new Error('Failed to delete collaboration');
-            }
-
-            alert('Collaboration deleted successfully for all users');
         } else {
             // Regular member leaving
             if (!confirm('Are you sure you want to leave this collaboration?')) {
                 return;
             }
 
-            // Format the current date for MySQL (YYYY-MM-DD HH:mm:ss)
-            const now = new Date();
-            const formattedDate = now.toISOString().slice(0, 19).replace('T', ' ');
-
-            // Update member status to 'left' instead of using a separate endpoint
-            const response = await fetch(`${API_BASE}/project-collaborations/${collaborationId}`, {
-                method: 'PUT',
+            response = await fetch(`${API_BASE}/project-collaborations/${collaborationId}/leave`, {
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 credentials: 'include',
                 body: JSON.stringify({ 
                     user_id_: user.user_id_,
-                    action: 'leave',
-                    leave_at: formattedDate
+                    project_id_: collaboration.project_id_,
+                    collaboration_name: collaboration.collaboration_name
                 })
             });
-
-            if (!response.ok) {
-                throw new Error('Failed to leave collaboration');
-            }
-
-            alert('You have left the collaboration successfully');
         }
 
-        // Refresh the collaborations display
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || 'Failed to process your request');
+        }
+
+        // Remove the collaboration card from UI
+        const card = document.querySelector(`[data-collaboration-id="${collaborationId}"]`);
+        if (card) {
+            card.remove();
+        }
+
+        // Show success message
+        const message = canDelete ? 
+            'Collaboration deleted successfully for all users' : 
+            'You have left the collaboration successfully';
+        alert(message);
+
+        // Refresh the display to ensure UI is in sync
         await fetchAndDisplayCollaborations();
 
     } catch (error) {
         console.error('Error handling collaboration action:', error);
         alert(error.message || 'Failed to process your request. Please try again.');
+        // Refresh the display on error to ensure UI is in sync
+        await fetchAndDisplayCollaborations();
     }
 }

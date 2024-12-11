@@ -128,11 +128,11 @@ router.get('/', async (req, res) => {
                 u.username,
                 u.user_email,
                 (SELECT COUNT(*) FROM project_collaboration 
-                 WHERE project_id_ = pc.project_id_) as member_count
+                 WHERE project_id_ = pc.project_id_ AND collaboration_name = pc.collaboration_name) as member_count
             FROM project_collaboration pc
             JOIN projects p ON pc.project_id_ = p.project_id_
             JOIN users u ON pc.user_id_ = u.user_id_
-            WHERE pc.user_id_ = ?
+            WHERE pc.user_id_ = ? AND pc.leave_at IS NULL
             ORDER BY pc.joined_at DESC
         `, [userId]);
 
@@ -236,83 +236,61 @@ router.delete('/:id', async (req, res) => {
     }
 });
 
-// Update collaboration status (for leaving members)
-router.put('/:id', async (req, res) => {
-    try {
-        const collaborationId = req.params.id;
-        const { user_id_, action, leave_at } = req.body;
-
-        console.log('Update collaboration request:', { collaborationId, user_id_, action });
-
-        if (!user_id_ || !action) {
-            return res.status(400).json({ error: 'User ID and action are required' });
-        }
-
-        if (action === 'leave') {
-            // Format the datetime for MySQL (YYYY-MM-DD HH:mm:ss)
-            const formattedLeaveAt = new Date(leave_at).toISOString().slice(0, 19).replace('T', ' ');
-            
-            // Update the member's collaboration status
-            const [result] = await db.execute(
-                `UPDATE project_collaboration 
-                SET leave_at = ?, collaboration_status = 'inactive'
-                WHERE project_collaboration_id_ = ? 
-                AND user_id_ = ? 
-                AND user_collab_role = 'member'`,
-                [formattedLeaveAt, collaborationId, user_id_]
-            );
-
-            console.log('Leave result:', result);
-
-            if (result.affectedRows === 0) {
-                return res.status(404).json({ 
-                    error: 'Collaboration not found or user not authorized to leave' 
-                });
-            }
-
-            res.json({ 
-                message: 'Successfully left collaboration',
-                updatedAt: leave_at
-            });
-        } else {
-            res.status(400).json({ error: 'Invalid action specified' });
-        }
-
-    } catch (error) {
-        console.error('Error updating collaboration:', error);
-        res.status(500).json({ error: 'Failed to update collaboration' });
-    }
-});
-
 // Member leaving collaboration
 router.post('/:id/leave', async (req, res) => {
     try {
         const collaborationId = req.params.id;
         const { user_id_ } = req.body;
 
-        console.log('Member leave request:', { collaborationId, user_id_ });
+        console.log('Leave request:', { collaborationId, user_id_ });
 
-        if (!user_id_) {
-            return res.status(400).json({ error: 'User ID is required' });
-        }
-
-        // Delete the member's collaboration entry
-        const [result] = await db.execute(
-            'DELETE FROM project_collaboration WHERE project_collaboration_id_ = ? AND user_id_ = ? AND user_collab_role = ?',
-            [collaborationId, user_id_, 'member']
+        // First verify this is a member trying to leave
+        const [memberCheck] = await db.execute(
+            `SELECT * FROM project_collaboration 
+             WHERE project_collaboration_id_ = ? AND user_id_ = ?`,
+            [collaborationId, user_id_]
         );
 
-        console.log('Delete result:', result);
-
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ error: 'Collaboration not found or user not authorized' });
+        if (memberCheck.length === 0) {
+            return res.status(403).json({ 
+                error: 'Collaboration not found or user not authorized' 
+            });
         }
 
-        res.json({ message: 'Successfully left collaboration' });
+        // Delete the member's collaboration entry completely
+        const [result] = await db.execute(
+            `DELETE FROM project_collaboration 
+             WHERE project_collaboration_id_ = ? AND user_id_ = ?`,
+            [collaborationId, user_id_]
+        );
+
+        console.log('Leave result:', result);
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Failed to remove collaboration' });
+        }
+
+        // Get updated member count
+        const [countResult] = await db.execute(
+            `SELECT COUNT(*) as remaining_members 
+             FROM project_collaboration 
+             WHERE project_id_ = ? AND collaboration_name = ?`,
+            [memberCheck[0].project_id_, memberCheck[0].collaboration_name]
+        );
+
+        res.json({ 
+            message: 'Successfully removed from collaboration',
+            collaborationId: collaborationId,
+            affectedRows: result.affectedRows,
+            remainingMembers: countResult[0].remaining_members
+        });
 
     } catch (error) {
-        console.error('Error leaving collaboration:', error);
-        res.status(500).json({ error: 'Failed to leave collaboration' });
+        console.error('Error removing from collaboration:', error);
+        res.status(500).json({ 
+            error: 'Failed to remove from collaboration',
+            details: error.message 
+        });
     }
 });
 

@@ -58,11 +58,25 @@ CREATE TABLE IF NOT EXISTS project_task_assignment (
   project_task_id_ INT PRIMARY KEY AUTO_INCREMENT,
   project_id_ INT NOT NULL,
   task_id_ INT NOT NULL,
-  task_assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP DEFAULT_GENERATED,
+  task_assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (project_id_) REFERENCES projects(project_id_) ON DELETE CASCADE,
   FOREIGN KEY (task_id_) REFERENCES tasks(task_id_) ON DELETE CASCADE,
   INDEX idx_project (project_id_),
   INDEX idx_task (task_id_)
+);
+
+CREATE TABLE task_assignments (
+    task_assignment_id_ INT NOT NULL AUTO_INCREMENT,
+    project_collaboration_id_ INT NOT NULL,
+    task_id_ INT NOT NULL,
+    assigned_to_ INT NOT NULL,
+    assigned_by_ INT NOT NULL,
+    assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (task_assignment_id_),
+    FOREIGN KEY (project_collaboration_id_) REFERENCES project_collaboration(project_collaboration_id_),
+    FOREIGN KEY (task_id_) REFERENCES tasks(task_id_),
+    FOREIGN KEY (assigned_to_) REFERENCES users(user_id_),
+    FOREIGN KEY (assigned_by_) REFERENCES users(user_id_)
 );
 
 
