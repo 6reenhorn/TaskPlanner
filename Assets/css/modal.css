@@ -359,3 +359,8 @@
 .assign-task-confirm-btn {
     width: 100px;
 }
+
+/* Checklist Management */
+.card.d-none {
+    display: none !important; /* Use !important to override Bootstrap styles */
+}

@@ -24,6 +24,10 @@ CREATE TABLE IF NOT EXISTS tasks (
     FOREIGN KEY (user_id_) REFERENCES users(user_id_)
 );
 
+ALTER TABLE tasks
+MODIFY COLUMN task_status ENUM('In Progress', 'Completed') DEFAULT 'In Progress';
+
+
 CREATE TABLE IF NOT EXISTS projects (
     project_id_ INT AUTO_INCREMENT PRIMARY KEY,
     user_id_ INT,
@@ -79,6 +83,31 @@ CREATE TABLE task_assignments (
     FOREIGN KEY (assigned_by_) REFERENCES users(user_id_)
 );
 
+-- For task_assignments table
+ALTER TABLE task_assignments
+DROP FOREIGN KEY `task_assignments_ibfk_2`, -- Task reference
+DROP FOREIGN KEY `task_assignments_ibfk_1`; -- Collaboration reference
+
+ALTER TABLE task_assignments
+ADD CONSTRAINT `task_assignments_task_fk`
+FOREIGN KEY (task_id_) 
+REFERENCES tasks(task_id_) 
+ON DELETE CASCADE,
+ADD CONSTRAINT `task_assignments_collaboration_fk`
+FOREIGN KEY (project_collaboration_id_) 
+REFERENCES project_collaboration(project_collaboration_id_) 
+ON DELETE CASCADE;
+
+-- Unified checklist table
+CREATE TABLE unified_checklist (
+    unified_checklist_id_ INT AUTO_INCREMENT PRIMARY KEY,
+    related_id_ INT NOT NULL,
+    related_type ENUM('Task', 'Project', 'Collaboration') NOT NULL,
+    item_description VARCHAR(255) NOT NULL,
+    is_completed BOOLEAN DEFAULT FALSE,
+    checked_at TIMESTAMP NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
 -- CREATE TABLE IF NOT EXISTS activity_logs (
 --     activity_log_id_PK INT AUTO_INCREMENT PRIMARY KEY,

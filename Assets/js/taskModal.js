@@ -157,9 +157,11 @@ document.addEventListener('DOMContentLoaded', fetchAndDisplayTasks);
 
 // Function to create a task card
 function createTaskCard(task) {
+    console.log('Task object for card:', task); // Log the entire task object
     const taskCard = document.createElement('div');
     taskCard.className = 'col-4 card d-flex card-bg mb-3';
     taskCard.setAttribute('data-task-id', task.task_id_);
+    taskCard.setAttribute('data-checklist-id', task.unified_checklist_id_);
     console.log('Creating card with task ID:', task.task_id_);
 
     // Format the date to be more readable
@@ -169,7 +171,12 @@ function createTaskCard(task) {
         <div class="card-header d-flex justify-content-between align-items-center my-0">
             ${task.task_title}
             <form action="">
-                <input type="checkbox" id="task-completion" name="task-completion" value="Finished">
+                <input type="checkbox" 
+                       id="task-completion-${task.task_id_}" 
+                       name="task-completion" 
+                       value="Completed" 
+                       ${task.is_completed ? 'checked disabled' : ''}
+                       onchange="handleCheckboxChange(${task.unified_checklist_id_ || 'null'})">
             </form>
         </div>
         <div class="card-body">
@@ -854,4 +861,57 @@ function resetModalToCreateMode() {
     createButton.style.display = 'block';
     updateButton.style.display = 'none';
     document.getElementById('newTaskForm').reset();
+}
+
+// Add this function near the existing task-related functions
+async function completeChecklistItem(checklistId) {
+    try {
+        console.log('Attempting to complete checklist item:', checklistId);
+        
+        const response = await fetch('http://localhost:4000/api/checklist/complete', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+            body: JSON.stringify({ checklistId })
+        });
+
+        console.log('Response status:', response.status);
+        
+        const result = await response.json();
+        console.log('Complete checklist response:', result);
+
+        if (result.success) {
+            // Refresh tasks
+            await fetchAndDisplayTasks();
+            alert('Task completed successfully!');
+        } else {
+            alert(result.message || 'Failed to complete task');
+        }
+    } catch (error) {
+        console.error('Error completing checklist item:', error);
+        alert('Error completing task. Please try again.');
+    }
+}
+
+function handleCheckboxChange(checklistId) {
+    console.log('Checkbox changed for checklist ID:', checklistId);
+    
+    // Get the task card element using the checklist ID
+    const taskCard = document.querySelector(`[data-checklist-id="${checklistId}"]`);
+    
+    // Log the task card to see if it's being selected correctly
+    console.log('Task card to hide:', taskCard);
+
+    // Call the function to complete the checklist item
+    completeChecklistItem(checklistId).then(() => {
+        // Hide the task card
+        if (taskCard) {
+            taskCard.style.display = 'none'; // Forcefully hide the card
+            console.log('Task card hidden:', taskCard);
+        } else {
+            console.error('Task card not found for checklist ID:', checklistId);
+        }
+    });
 }

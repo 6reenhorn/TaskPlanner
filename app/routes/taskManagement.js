@@ -14,7 +14,10 @@ router.get('/', async (req, res) => {
         }
 
         const [tasks] = await db.execute(
-            'SELECT * FROM tasks WHERE user_id_ = ?',
+            `SELECT t.*, uc.unified_checklist_id_, uc.is_completed 
+             FROM tasks t
+             LEFT JOIN unified_checklist uc ON t.task_id_ = uc.related_id_ AND uc.related_type = 'Task'
+             WHERE t.user_id_ = ?`,
             [userId]
         );
 
@@ -28,87 +31,42 @@ router.get('/', async (req, res) => {
 
 // POST new task or associate existing tasks
 router.post('/', async (req, res) => {
+    const connection = await db.getConnection();
     try {
-        console.log('Raw request body:', req.body);
-        console.log('Content-Type:', req.headers['content-type']);
-        
-        // Basic request validation
-        if (!req.body || Object.keys(req.body).length === 0) {
-            console.log('Empty request body received');
-            return res.status(400).json({ error: 'No task data provided' });
-        }
+        await connection.beginTransaction();
 
-        let taskToProcess;
-        if (req.body.tasks) {
-            // For project tasks (multiple)
-            console.log('Processing multiple tasks');
-            taskToProcess = req.body.tasks;
-        } else {
-            // For single task creation
-            console.log('Processing single task');
-            taskToProcess = [req.body];
-        }
+        // Insert task
+        const [result] = await connection.execute(
+            'INSERT INTO tasks (task_title, task_description, task_due_date, task_priority, task_status, user_id_) VALUES (?, ?, ?, ?, ?, ?)',
+            [
+                req.body.task_title,
+                req.body.task_description || null,
+                req.body.task_due_date,
+                req.body.task_priority || 'low',
+                'In Progress', // Set default status
+                req.body.user_id_
+            ]
+        );
 
-        console.log('Tasks to process:', taskToProcess);
+        // Create corresponding checklist item
+        await connection.execute(
+            'INSERT INTO unified_checklist (related_id_, related_type, item_description) VALUES (?, ?, ?)',
+            [
+                result.insertId, // Use the ID of the newly created task
+                'Task', 
+                `Complete task: ${req.body.task_title}`
+            ]
+        );
 
-        if (!Array.isArray(taskToProcess) || taskToProcess.length === 0) {
-            console.log('Invalid task data structure');
-            return res.status(400).json({ error: 'Invalid task data structure' });
-        }
-
-        const results = [];
-        for (const task of taskToProcess) {
-            // Validate task data
-            if (!task.task_title || !task.task_due_date || !task.user_id_) {
-                console.log('Invalid task data:', task);
-                return res.status(400).json({ 
-                    error: 'Missing required fields',
-                    details: {
-                        title: !task.task_title ? 'Task title is required' : null,
-                        dueDate: !task.task_due_date ? 'Due date is required' : null,
-                        userId: !task.user_id_ ? 'User ID is required' : null
-                    }
-                });
-            }
-
-            // Format date
-            const formattedDueDate = new Date(task.task_due_date).toISOString().split('T')[0];
-
-            // Insert task
-            const [result] = await db.execute(
-                'INSERT INTO tasks (task_title, task_description, task_due_date, task_priority, user_id_) VALUES (?, ?, ?, ?, ?)',
-                [
-                    task.task_title,
-                    task.task_description || null,
-                    formattedDueDate,
-                    task.task_priority || 'low',
-                    task.user_id_
-                ]
-            );
-
-            console.log('Insert result:', result);
-
-            // Get created task
-            const [newTask] = await db.execute(
-                'SELECT * FROM tasks WHERE task_id_ = ?',
-                [result.insertId]
-            );
-
-            console.log('Created task:', newTask[0]);
-            results.push(newTask[0]);
-        }
-
-        // Send response
-        const response = taskToProcess.length === 1 ? results[0] : { success: true, results };
-        console.log('Sending response:', response);
-        res.status(201).json(response);
-
-    } catch (err) {
-        console.error('Error processing task:', err);
-        res.status(500).json({ 
-            error: 'Failed to process tasks',
-            details: err.message 
-        });
+        // Commit transaction
+        await connection.commit();
+        res.status(201).json({ message: 'Task created successfully', taskId: result.insertId });
+    } catch (error) {
+        await connection.rollback();
+        console.error('Error creating task:', error);
+        res.status(500).json({ error: 'Failed to create task' });
+    } finally {
+        connection.release();
     }
 });
 

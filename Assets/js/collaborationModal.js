@@ -426,10 +426,14 @@ async function viewCollaborationDetails(collaborationId) {
     }
 }
 
-// Function to handle viewing collaboration details
+// Store current collaboration ID globally
+let currentCollaborationId = null;
+
 async function handleViewCollaborationDetails(collaboration) {
     try {
-        // Update modal content with collaboration details
+        currentCollaborationId = collaboration.project_collaboration_id_;
+
+        // Update collaboration details
         document.getElementById('collaborationTitle').textContent = collaboration.collaboration_name;
         document.getElementById('collaborationEndDate').textContent = `End Date: ${new Date(collaboration.collaboration_end_date).toLocaleDateString()}`;
         document.getElementById('collaborationStatus').textContent = collaboration.collaboration_status;
@@ -438,7 +442,7 @@ async function handleViewCollaborationDetails(collaboration) {
         const statusBadge = document.getElementById('collaborationStatus');
         statusBadge.className = 'badge ' + (collaboration.collaboration_status === 'Active' ? 'bg-success' : 'bg-warning');
 
-        // Fetch team members
+        // Fetch members
         const membersResponse = await fetch(`${API_BASE_URL}/api/project-collaborations/${collaboration.project_collaboration_id_}/members`, {
             credentials: 'include',
             headers: {
@@ -447,7 +451,7 @@ async function handleViewCollaborationDetails(collaboration) {
         });
         
         if (!membersResponse.ok) {
-            throw new Error(`Failed to fetch team members: ${membersResponse.status}`);
+            throw new Error(`Failed to fetch members: ${membersResponse.status}`);
         }
         const members = await membersResponse.json();
         console.log('Team members:', members);
@@ -455,54 +459,56 @@ async function handleViewCollaborationDetails(collaboration) {
         // Update team members list
         const teamMembersList = document.getElementById('teamMembersList');
         teamMembersList.innerHTML = members.length ? members.map(member => `
-            <div class="list-group-item d-flex justify-content-between align-items-center fs-6">
+            <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
                 <div>
                     <strong>${member.username}</strong>
-                    <small class="text-muted">${member.user_email}</small>
+                    <small class="text-muted d-block">${member.user_email}</small>
                 </div>
-                <span class="badge bg-primary">${member.user_collab_role}</span>
+                <span class="badge ${member.user_collab_role === 'admin' ? 'bg-primary' : 'bg-secondary'}">
+                    ${member.user_collab_role}
+                </span>
             </div>
         `).join('') : '<div class="list-group-item">No team members found</div>';
 
-        // Fetch project tasks using the correct endpoint
-        if (collaboration.project_collaboration_id_) {
-            const tasksResponse = await fetch(`${API_BASE_URL}/api/project-collaborations/${collaboration.project_collaboration_id_}/tasks`, {
-                credentials: 'include',
-                headers: {
-                    'Accept': 'application/json'
-                }
-            });
-            
-            if (!tasksResponse.ok) {
-                throw new Error(`Failed to fetch tasks: ${tasksResponse.status}`);
+        // Fetch tasks
+        const tasksResponse = await fetch(`${API_BASE_URL}/api/project-collaborations/${collaboration.project_collaboration_id_}/tasks`, {
+            credentials: 'include',
+            headers: {
+                'Accept': 'application/json'
             }
-            const tasks = await tasksResponse.json();
-            console.log('Project tasks:', tasks);
+        });
+        
+        if (!tasksResponse.ok) {
+            throw new Error(`Failed to fetch tasks: ${tasksResponse.status}`);
+        }
+        const tasks = await tasksResponse.json();
+        console.log('Project tasks:', tasks);
 
-            // Update tasks grid
-            const tasksGrid = document.getElementById('tasksGrid');
-            tasksGrid.innerHTML = tasks.length ? tasks.map(task => `
-                <div class="col-md-6 mb-3">
-                    <div class="card">
-                        <div class="card-body">
-                            <h6 class="card-title">${task.task_title}</h6>
-                            <p class="card-text small">${task.task_description || 'No description'}</p>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span class="badge bg-${task.task_priority === 'high' ? 'danger' : 'info'}">${task.task_priority}</span>
-                                <small class="text-muted">Due: ${new Date(task.task_due_date).toLocaleDateString()}</small>
-                            </div>
-                            ${task.username ? `
-                                <div class="mt-2 text-muted small">
-                                    Assigned to: ${task.username}
-                                </div>
-                            ` : ''}
+        // Update tasks grid
+        const tasksGrid = document.getElementById('tasksGrid');
+        tasksGrid.innerHTML = tasks.length ? tasks.map(task => `
+            <div class="col-md-6 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="card-title">${task.task_title}</h6>
+                        <p class="card-text small">${task.task_description || 'No description'}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="badge bg-${task.task_priority === 'high' ? 'danger' : 'info'}">${task.task_priority}</span>
+                            <small class="text-muted">Due: ${new Date(task.task_due_date).toLocaleDateString()}</small>
+                        </div>
+                        <div class="mt-2 text-muted small">
+                            ${task.assigned_username ? 
+                                `Assigned to: ${task.assigned_username}` : 
+                                'Not assigned'}
                         </div>
                     </div>
                 </div>
-            `).join('') : '<div class="col-12">No tasks available</div>';
-        } else {
-            document.getElementById('tasksGrid').innerHTML = '<div class="col-12">No project associated with this collaboration</div>';
-        }
+            </div>
+        `).join('') : '<div class="col-12">No tasks available</div>';
+
+        // Setup assign task button with tasks and members
+        const assignTaskBtn = document.getElementById('assignTaskBtn');
+        assignTaskBtn.onclick = () => openAssignTaskModal(tasks, members);
 
         // Show the modal
         const collaborationDetailsModal = new bootstrap.Modal(document.getElementById('collaborationDetailsModal'));
@@ -514,50 +520,84 @@ async function handleViewCollaborationDetails(collaboration) {
     }
 }
 
-// Add event listener for task assignment
-document.getElementById('assignTaskBtn').addEventListener('click', () => {
-    const taskAssignmentModal = new bootstrap.Modal(document.getElementById('taskAssignmentModal'));
-    taskAssignmentModal.show();
-});
+// Function to open and populate the assign task modal
+function openAssignTaskModal(tasks, members) {
+    console.log('Opening task assignment modal');
+    console.log('Tasks:', tasks);
+    console.log('Members:', members);
 
-// Add event listener for task assignment confirmation
-document.getElementById('confirmAssignTask').addEventListener('click', async () => {
-    const taskId = document.getElementById('taskSelect').value;
-    const assigneeId = document.getElementById('memberSelect').value;
+    // Populate task select
+    const taskSelect = document.getElementById('taskSelect');
+    taskSelect.innerHTML = tasks.map(task => `
+        <option value="${task.task_id_}">${task.task_title} ${task.assigned_username ? `(Currently: ${task.assigned_username})` : ''}</option>
+    `).join('');
 
-    if (!taskId || !assigneeId) {
-        alert('Please select both a task and a team member');
-        return;
-    }
+    // Populate member select
+    const memberSelect = document.getElementById('memberSelect');
+    memberSelect.innerHTML = members.map(member => `
+        <option value="${member.user_id_}">${member.username}</option>
+    `).join('');
 
+    // Show the modal
+    const modal = new bootstrap.Modal(document.getElementById('taskAssignmentModal'));
+    modal.show();
+}
+
+// Handle task assignment
+document.getElementById('confirmAssignTask').addEventListener('click', async function() {
     try {
-        const response = await fetch(`${API_BASE_URL}/team/task-assignments`, {
+        const taskId = document.getElementById('taskSelect').value;
+        const assignedTo = document.getElementById('memberSelect').value;
+        const user = JSON.parse(sessionStorage.getItem('user') || localStorage.getItem('user'));
+
+        if (!taskId || !assignedTo || !user || !currentCollaborationId) {
+            throw new Error('Missing required information');
+        }
+
+        const response = await fetch(`${API_BASE_URL}/api/project-collaborations/task-assignments`, {
             method: 'POST',
+            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
                 task_id_: taskId,
-                assigned_to_: assigneeId,
-                assigned_by_: JSON.parse(sessionStorage.getItem('user')).user_id_
+                assigned_to_: assignedTo,
+                assigned_by_: user.user_id_,
+                project_collaboration_id_: currentCollaborationId
             })
         });
 
         if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.error || 'Failed to assign task');
+            const errorText = await response.text();
+            throw new Error(errorText || 'Failed to assign task');
         }
 
-        alert('Task assigned successfully');
+        // Close both modals
         const taskAssignmentModal = bootstrap.Modal.getInstance(document.getElementById('taskAssignmentModal'));
-        taskAssignmentModal.hide();
+        if (taskAssignmentModal) {
+            taskAssignmentModal.hide();
+        }
+
+        // Explicitly hide the modal backdrop
+        const modalBackdrop = document.querySelector('.modal-backdrop');
+        if (modalBackdrop) {
+            modalBackdrop.remove();
+        }
+
+        // Refresh the collaboration details
+        await viewCollaborationDetails(currentCollaborationId);
+
+        // Show success message
+        alert('Task assigned successfully!');
 
     } catch (error) {
         console.error('Error assigning task:', error);
-        alert(error.message || 'Failed to assign task. Please try again.');
+        alert('Failed to assign task: ' + error.message);
     }
 });
 
 // Make functions available globally
 window.viewCollaborationDetails = viewCollaborationDetails;
 window.handleViewCollaborationDetails = handleViewCollaborationDetails;
+window.openAssignTaskModal = openAssignTaskModal;

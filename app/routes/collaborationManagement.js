@@ -406,10 +406,14 @@ router.get('/:id/tasks', async (req, res) => {
             SELECT 
                 t.*,
                 u.username,
-                pta.project_task_id_
+                pta.project_task_id_,
+                ta.assigned_to_,
+                au.username as assigned_username
             FROM tasks t
             JOIN project_task_assignment pta ON t.task_id_ = pta.task_id_
             LEFT JOIN users u ON t.user_id_ = u.user_id_
+            LEFT JOIN task_assignments ta ON t.task_id_ = ta.task_id_
+            LEFT JOIN users au ON ta.assigned_to_ = au.user_id_
             WHERE pta.project_id_ = ?
             ORDER BY t.task_due_date ASC,
                 CASE t.task_priority
@@ -435,33 +439,55 @@ router.get('/:id/tasks', async (req, res) => {
 // Assign task to team member
 router.post('/task-assignments', async (req, res) => {
     try {
-        const { task_id_, assigned_to_, assigned_by_ } = req.body;
+        const { task_id_, assigned_to_, assigned_by_, project_collaboration_id_ } = req.body;
 
-        if (!task_id_ || !assigned_to_ || !assigned_by_) {
+        if (!task_id_ || !assigned_to_ || !assigned_by_ || !project_collaboration_id_) {
             return res.status(400).json({ error: 'Missing required fields' });
         }
 
-        // Check if user is authorized to assign tasks
-        const [assignerRole] = await db.execute(
-            `SELECT pc.user_collab_role 
-             FROM project_collaboration pc
-             JOIN tasks t ON pc.project_id_ = t.project_id_
-             WHERE t.task_id_ = ? AND pc.user_id_ = ?`,
-            [task_id_, assigned_by_]
+        // First, verify the project collaboration
+        const [collaborationCheck] = await db.execute(
+            `SELECT project_id_ 
+             FROM project_collaboration 
+             WHERE project_collaboration_id_ = ?`,
+            [project_collaboration_id_]
         );
 
-        if (assignerRole.length === 0 || 
-            (assignerRole[0].user_collab_role !== 'admin' && assignerRole[0].user_collab_role !== 'member')) {
+        if (collaborationCheck.length === 0) {
+            return res.status(400).json({ error: 'Invalid collaboration' });
+        }
+
+        // Verify task is part of the project
+        const [taskProjectCheck] = await db.execute(
+            `SELECT project_id_ 
+             FROM project_task_assignment 
+             WHERE task_id_ = ? AND project_id_ = ?`,
+            [task_id_, collaborationCheck[0].project_id_]
+        );
+
+        if (taskProjectCheck.length === 0) {
+            return res.status(400).json({ error: 'Task not associated with this project' });
+        }
+
+        // Check if user is authorized to assign tasks (is part of the collaboration)
+        const [assignerCheck] = await db.execute(
+            `SELECT user_collab_role 
+             FROM project_collaboration 
+             WHERE project_collaboration_id_ = ? AND user_id_ = ?`,
+            [project_collaboration_id_, assigned_by_]
+        );
+
+        if (assignerCheck.length === 0 || 
+            (assignerCheck[0].user_collab_role !== 'admin' && assignerCheck[0].user_collab_role !== 'member')) {
             return res.status(403).json({ error: 'Not authorized to assign tasks' });
         }
 
         // Check if assignee is part of the collaboration
         const [assigneeCheck] = await db.execute(
-            `SELECT pc.project_collaboration_id_
-             FROM project_collaboration pc
-             JOIN tasks t ON pc.project_id_ = t.project_id_
-             WHERE t.task_id_ = ? AND pc.user_id_ = ?`,
-            [task_id_, assigned_to_]
+            `SELECT project_collaboration_id_
+             FROM project_collaboration 
+             WHERE project_id_ = ? AND user_id_ = ?`,
+            [collaborationCheck[0].project_id_, assigned_to_]
         );
 
         if (assigneeCheck.length === 0) {
@@ -479,7 +505,13 @@ router.post('/task-assignments', async (req, res) => {
             `INSERT INTO task_assignments 
              (project_collaboration_id_, task_id_, assigned_to_, assigned_by_)
              VALUES (?, ?, ?, ?)`,
-            [assigneeCheck[0].project_collaboration_id_, task_id_, assigned_to_, assigned_by_]
+            [project_collaboration_id_, task_id_, assigned_to_, assigned_by_]
+        );
+
+        // Update the task's user_id_ to the assigned user
+        await db.execute(
+            `UPDATE tasks SET user_id_ = ? WHERE task_id_ = ?`,
+            [assigned_to_, task_id_]
         );
 
         res.json({

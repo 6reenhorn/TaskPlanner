@@ -1,0 +1,140 @@
+:root {
+    --primary-color: #2E2E2E;
+    --secondary-color: #283593;
+    --accent-color-1: #FFA726;
+    --accent-color-2: #F5F5F5;
+    --accent-color-3: #3FAFAF;
+    --border-color-1: #3FAFAF;
+    --highlight-color-1: #4169E1;
+    --bg-color-1: #4A4A4A;
+    --bg-color-2: #363636;
+    --txt-color-1: #FFFFFF;
+    --card-bg-1: #ededed;
+}
+
+/* Admin Sidebar */
+#wrapper {
+    display: flex;
+    width: 100%;
+    transition: margin-left 0.3s; /* Smooth transition for sidebar */
+}
+
+#sidebar-wrapper {
+    min-height: calc(100vh - 70px); /* Full height minus header height */
+    width: 250px; /* Width of the sidebar */
+    position: fixed; /* Fix the sidebar */
+    top: 70px; /* Position below the header */
+    left: -250px; /* Hide the sidebar off-screen */
+    transition: left 0.3s; /* Smooth transition for opening/closing */
+    background-color: #f8f9fa; /* Background color */
+    padding-top: 10px;
+    z-index: 1000; /* Ensure it stays above other content */
+    padding-left: 15px;
+}
+
+#sidebar-wrapper.active {
+    left: 0; /* Show the sidebar */
+}
+
+#page-content-wrapper {
+    flex: 1; /* Take the remaining space */
+    padding: 20px; /* Add some padding */
+    margin-left: 250px; /* Space for the sidebar */
+    transition: margin-left 0.3s; /* Smooth transition for content */
+}
+
+#page-content-wrapper.collapsed {
+    margin-left: 0; /* Adjust content margin when sidebar is collapsed */
+}
+
+.sidebar-heading {
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.navbar-text {
+    font-size: 13px;
+}
+
+.admin-toggle-icon {
+    width: 25px; /* Adjust icon size */
+    height: 25px;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: contain;
+}
+
+.header-container {
+    width: 100%; /* Full width */
+    padding: 10px 0; /* Padding for the header */
+    background-color: #f8f9fa; /* Background color */
+    position: fixed; /* Fix the header */
+    top: 0; /* Position at the top */
+    left: 0; /* Align to the left */
+    z-index: 1001; /* Ensure it stays above the sidebar */
+}
+
+.header-container h1 {
+    font-size: 35px;
+    font-weight: 600;
+    margin-left: 280px; /* Adjust margin to avoid overlap with toggle button */
+}
+
+/* Position the toggle button */
+.toggle-btn {
+    position: fixed; /* Fixed position */
+    top: 18px; /* Distance from the top */
+    left: 10px; /* Distance from the left */
+    z-index: 1100; /* Ensure it stays above the sidebar */
+    border-radius: 5px;
+    background-color: var(--bg-color-1);
+    border: 1px solid var(--accent-color-3);
+}
+
+.toggle-btn:hover {
+    background-color: var(--bg-color-2);
+    border: 1px solid var(--accent-color-3);
+    width: 40px;
+    transition: ease-in-out all 0.3s;
+}
+
+/* Employee Management Section */
+.admin-main-pages {
+    position: absolute; /* Position sections absolutely */
+    top: 80px;
+    left: 251px;
+    width: 100%;
+    padding-left: 45px;
+    padding-top: 10px;
+    height: calc(100vh - 70px); /* Full height minus header height */
+    transform: translateX(100%); /* Start off-screen to the right */
+    transition: transform 1s ease; /* Smooth transition for sliding */
+    display: none;
+}
+
+.admin-main-pages h1 {
+    font-size: 25px;
+    font-weight: 600;
+    margin-right: 45px;
+}
+
+.admin-main-pages.active {
+    display: block;
+    transform: translateX(0); /* Slide in from the right */
+}
+
+.employee-management-section {
+    height: 100%;
+    width: 100%;
+    color: #000000;
+}
+
+.user-management-section {
+    height: 100%;
+    width: 100%;
+}
+
+.activity-log-section {
+    height: 100%;
+    width: 100%;
+}

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <link rel="stylesheet" href="./Assets/css/adminPage.css">
+    <link rel="stylesheet" href="./Assets/css/modal.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="d-flex" id="wrapper">
+        <!-- Toggle Button -->
+        <button class="toggle-btn d-flex justify-content-center align-items-center" id="toggleSidebar">
+            <img src="./Assets/img/toggle-Icon.png" alt="Toggle Sidebar" class="admin-toggle-icon">
+        </button>
+
+        <!-- Header -->
+        <div class="header-container d-flex justify-content-start align-items-center border-bottom">
+            <h1>Admin Panel</h1>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="bg-light border-right" id="sidebar-wrapper">
+            <div class="sidebar-heading pt-3">Admin Panel</div>
+            <div class="list-group list-group-flush pt-3 navbar-text">
+                <a href="#employeeManagement" class="list-group-item list-group-item-action bg-light">Employee Management</a>
+                <a href="#userManagement" class="list-group-item list-group-item-action bg-light">User Management</a>
+                <a href="#activityLog" class="list-group-item list-group-item-action bg-light">Activity Log</a>
+            </div>
+        </div>
+
+        <!-- Page Content -->
+        <div id="page-content-wrapper">
+            <div class="container-fluid">
+                <div id="employeeManagement" class="employee-management-section admin-main-pages">
+                    <div class="d-flex align-items-center">
+                        <h1>Employee Management</h1>
+                        <button type="button" class="btn btn-primary btn-sm">Add Employee</button>
+                    </div>
+                    <!-- Employee Management Content Here -->
+                </div>
+                <div id="userManagement" class="user-management-section admin-main-pages">
+                    <h1>User Management</h1>
+                    <!-- User Management Content Here -->
+                </div>
+                <div id="activityLog" class="activity-log-section admin-main-pages">
+                    <h1>Activity Log</h1>
+                    <!-- Activity Log Content Here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="./Assets/js/admin.js"></script> <!-- New JavaScript file for admin functionalities -->
+</body>
+</html>

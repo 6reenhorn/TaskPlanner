@@ -7,6 +7,7 @@ const authRoutes = require('../routes/authManagement');
 const projectTaskRoutes = require('../routes/projectTaskManagement');
 const activityRoutes = require('../routes/activityManagement');
 const collaborationRoutes = require('../routes/collaborationManagement');
+const checklistRoutes = require('../routes/checklistManagement');
 
 const app = express();
 
@@ -58,7 +59,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/project-tasks', projectTaskRoutes);
 app.use('/api/activities', activityRoutes);
 app.use('/api/project-collaborations', collaborationRoutes);
-
+app.use('/api/checklist', checklistRoutes);
 // Error handler
 app.use((err, req, res, next) => {
     console.error('Error details:', {
