@@ -145,6 +145,34 @@ router.get('/', async (req, res) => {
     }
 });
 
+// Get collaborations for a specific user
+router.get('/user/:userId', async (req, res) => {
+    try {
+        const userId = req.params.userId;
+        console.log('Fetching collaborations for user:', userId);
+
+        const [collaborations] = await db.execute(`
+            SELECT 
+                pc.*,
+                p.project_title as project_name,
+                p.project_description,
+                p.project_status,
+                p.project_start_date,
+                p.project_end_date
+            FROM project_collaboration pc
+            JOIN projects p ON pc.project_id_ = p.project_id_
+            WHERE pc.user_id_ = ?
+            OR pc.user_id_ = ?
+        `, [userId, userId]);
+
+        console.log('Found collaborations:', collaborations);
+        res.json(collaborations);
+    } catch (error) {
+        console.error('Error fetching user collaborations:', error);
+        res.status(500).json({ error: 'Failed to fetch collaborations' });
+    }
+});
+
 // Get collaboration details
 router.get('/:id', async (req, res) => {
     try {
@@ -172,70 +200,86 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-// Delete entire collaboration (admin/creator only)
+// Delete collaboration
 router.delete('/:id', async (req, res) => {
     try {
         const collaborationId = req.params.id;
-        const userRole = req.headers['x-user-role'];
-        const userId = req.headers['x-user-id'];
-        const isFullDelete = req.headers['x-full-delete'] === 'true';
+        const { user_id_, is_admin } = req.body;
 
-        console.log('Delete request:', { collaborationId, userRole, userId, isFullDelete });
+        console.log('Delete request:', { collaborationId, user_id_, is_admin });
 
-        // Get collaboration details first
-        const [collaborationDetails] = await db.execute(
-            `SELECT pc.project_id_, pc.collaboration_name, pc.user_id_, pc.user_collab_role 
-             FROM project_collaboration pc 
-             WHERE pc.project_collaboration_id_ = ?`,
-            [collaborationId]
-        );
+        if (!user_id_) {
+            return res.status(400).json({ error: 'User ID is required' });
+        }
 
-        if (collaborationDetails.length === 0) {
+        // Get collaboration details
+        const [collaborations] = await db.execute(`
+            SELECT * FROM project_collaboration 
+            WHERE project_collaboration_id_ = ?
+        `, [collaborationId]);
+
+        if (collaborations.length === 0) {
             return res.status(404).json({ error: 'Collaboration not found' });
         }
 
-        const collaboration = collaborationDetails[0];
+        const collaboration = collaborations[0];
+        console.log('Found collaboration:', collaboration);
 
-        // Check permissions
-        const isSystemAdmin = userRole === 'admin';
-        const isCollabCreator = collaboration.user_id_ === parseInt(userId) && 
-                               collaboration.user_collab_role === 'admin';
+        // Check if user is admin of this collaboration
+        const [userCollab] = await db.execute(`
+            SELECT user_collab_role 
+            FROM project_collaboration 
+            WHERE project_collaboration_id_ = ? 
+            AND user_id_ = ?
+            AND user_collab_role = 'admin'
+        `, [collaborationId, user_id_]);
 
-        if (!isSystemAdmin && !isCollabCreator) {
-            return res.status(403).json({ error: 'Not authorized to delete this collaboration' });
-        }
+        const isAdmin = userCollab.length > 0;
+        console.log('Is admin:', isAdmin);
 
-        let result;
-        if (isFullDelete) {
-            // Delete all related collaboration entries for full deletion
-            [result] = await db.execute(
-                `DELETE FROM project_collaboration 
-                 WHERE project_id_ = ? AND collaboration_name = ?`,
-                [collaboration.project_id_, collaboration.collaboration_name]
-            );
+        if (is_admin && isAdmin) {
+            // Admin deleting - remove all related collaborations
+            console.log('Performing admin delete for collaboration');
+            const [result] = await db.execute(`
+                DELETE FROM project_collaboration 
+                WHERE project_id_ = ? 
+                AND collaboration_name = ?
+            `, [collaboration.project_id_, collaboration.collaboration_name]);
 
-            console.log('Full delete result:', {
-                projectId: collaboration.project_id_,
-                collaborationName: collaboration.collaboration_name,
-                affectedRows: result.affectedRows
+            console.log('Admin delete result:', result);
+
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ error: 'No collaborations found to delete' });
+            }
+
+            res.json({ 
+                message: 'Collaboration deleted for all members',
+                deletedCount: result.affectedRows,
+                isFullDelete: true
+            });
+        } else if (!is_admin) {
+            // Member leaving - only update their record
+            console.log('Marking member leave for user:', user_id_);
+            const [result] = await db.execute(`
+                UPDATE project_collaboration 
+                SET leave_at = CURRENT_TIMESTAMP
+                WHERE project_collaboration_id_ = ? 
+                AND user_id_ = ?
+            `, [collaborationId, user_id_]);
+
+            console.log('Member leave result:', result);
+
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ error: 'Collaboration not found or already left' });
+            }
+
+            res.json({ 
+                message: 'Successfully left the collaboration',
+                isFullDelete: false
             });
         } else {
-            // Delete only the specific collaboration entry
-            [result] = await db.execute(
-                'DELETE FROM project_collaboration WHERE project_collaboration_id_ = ?',
-                [collaborationId]
-            );
+            return res.status(403).json({ error: 'Not authorized to delete this collaboration' });
         }
-
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ error: 'No collaborations were deleted' });
-        }
-
-        res.json({ 
-            message: isFullDelete ? 'Collaboration deleted for all users' : 'Collaboration deleted',
-            deletedEntries: result.affectedRows
-        });
-
     } catch (error) {
         console.error('Error deleting collaboration:', error);
         res.status(500).json({ 
@@ -299,6 +343,155 @@ router.post('/:id/leave', async (req, res) => {
         res.status(500).json({ 
             error: 'Failed to remove from collaboration',
             details: error.message 
+        });
+    }
+});
+
+// Get team members for a collaboration
+router.get('/:id/members', async (req, res) => {
+    try {
+        const collaborationId = req.params.id;
+        console.log('Fetching members for collaboration:', collaborationId);
+
+        // Get all members in this collaboration group (matching collaboration_name and project_id_)
+        const [members] = await db.execute(`
+            SELECT DISTINCT 
+                u.user_id_,
+                u.username,
+                u.user_email,
+                pc.user_collab_role,
+                pc.joined_at
+            FROM project_collaboration pc1
+            JOIN project_collaboration pc ON pc.project_id_ = pc1.project_id_ 
+                AND pc.collaboration_name = pc1.collaboration_name
+            JOIN users u ON pc.user_id_ = u.user_id_
+            WHERE pc1.project_collaboration_id_ = ?
+                AND pc.leave_at IS NULL
+            ORDER BY 
+                CASE WHEN pc.user_collab_role = 'admin' THEN 1 ELSE 2 END,
+                pc.joined_at ASC
+        `, [collaborationId]);
+
+        console.log('Found members:', members);
+        res.json(members);
+
+    } catch (error) {
+        console.error('Error fetching team members:', error);
+        res.status(500).json({ 
+            error: 'Failed to fetch team members',
+            details: error.message 
+        });
+    }
+});
+
+// Get tasks for a collaboration
+router.get('/:id/tasks', async (req, res) => {
+    try {
+        const collaborationId = req.params.id;
+        console.log('Fetching tasks for collaboration:', collaborationId);
+
+        // First get the project_id_ from the collaboration
+        const [collaboration] = await db.execute(`
+            SELECT project_id_ 
+            FROM project_collaboration 
+            WHERE project_collaboration_id_ = ?
+        `, [collaborationId]);
+
+        if (collaboration.length === 0) {
+            return res.status(404).json({ error: 'Collaboration not found' });
+        }
+
+        // Get all tasks for this project using the new query with proper joins
+        const [tasks] = await db.execute(`
+            SELECT 
+                t.*,
+                u.username,
+                pta.project_task_id_
+            FROM tasks t
+            JOIN project_task_assignment pta ON t.task_id_ = pta.task_id_
+            LEFT JOIN users u ON t.user_id_ = u.user_id_
+            WHERE pta.project_id_ = ?
+            ORDER BY t.task_due_date ASC,
+                CASE t.task_priority
+                    WHEN 'high' THEN 1
+                    WHEN 'medium' THEN 2
+                    WHEN 'low' THEN 3
+                    ELSE 4
+                END
+        `, [collaboration[0].project_id_]);
+
+        console.log('Found tasks:', tasks);
+        res.json(tasks);
+
+    } catch (error) {
+        console.error('Error fetching tasks:', error);
+        res.status(500).json({ 
+            error: 'Failed to fetch tasks',
+            details: error.message 
+        });
+    }
+});
+
+// Assign task to team member
+router.post('/task-assignments', async (req, res) => {
+    try {
+        const { task_id_, assigned_to_, assigned_by_ } = req.body;
+
+        if (!task_id_ || !assigned_to_ || !assigned_by_) {
+            return res.status(400).json({ error: 'Missing required fields' });
+        }
+
+        // Check if user is authorized to assign tasks
+        const [assignerRole] = await db.execute(
+            `SELECT pc.user_collab_role 
+             FROM project_collaboration pc
+             JOIN tasks t ON pc.project_id_ = t.project_id_
+             WHERE t.task_id_ = ? AND pc.user_id_ = ?`,
+            [task_id_, assigned_by_]
+        );
+
+        if (assignerRole.length === 0 || 
+            (assignerRole[0].user_collab_role !== 'admin' && assignerRole[0].user_collab_role !== 'member')) {
+            return res.status(403).json({ error: 'Not authorized to assign tasks' });
+        }
+
+        // Check if assignee is part of the collaboration
+        const [assigneeCheck] = await db.execute(
+            `SELECT pc.project_collaboration_id_
+             FROM project_collaboration pc
+             JOIN tasks t ON pc.project_id_ = t.project_id_
+             WHERE t.task_id_ = ? AND pc.user_id_ = ?`,
+            [task_id_, assigned_to_]
+        );
+
+        if (assigneeCheck.length === 0) {
+            return res.status(400).json({ error: 'Assignee must be a member of the collaboration' });
+        }
+
+        // Remove any existing assignments for this task
+        await db.execute(
+            'DELETE FROM task_assignments WHERE task_id_ = ?',
+            [task_id_]
+        );
+
+        // Create new task assignment
+        const [result] = await db.execute(
+            `INSERT INTO task_assignments 
+             (project_collaboration_id_, task_id_, assigned_to_, assigned_by_)
+             VALUES (?, ?, ?, ?)`,
+            [assigneeCheck[0].project_collaboration_id_, task_id_, assigned_to_, assigned_by_]
+        );
+
+        res.json({
+            message: 'Task assigned successfully',
+            assignment_id: result.insertId
+        });
+
+    } catch (error) {
+        console.error('Error assigning task:', error);
+        res.status(500).json({ 
+            error: 'Failed to assign task',
+            details: error.message
         });
     }
 });

@@ -324,3 +324,38 @@
     background: var(--bg-color-1);
     transition: ease-in all 0.2s;
 }
+
+/* Collaboration Assign Task Button */
+.collaboration-assign-task-btn {
+    border: 2px solid var(--bg-color-1);
+    color: var(--primary-color);
+    font-size: 10px;
+    font-weight: 600;
+    width: 150px;
+    background-color: transparent;
+    border-radius: 5px;
+    padding: 5px 0 5px 0;
+}
+
+.collaboration-assign-task-btn:hover {
+    border: 2px solid var(--accent-color-3);
+    color: var(--accent-color-3);
+    background: var(--bg-color-1);
+    transition: ease-in all 0.2s;
+}
+
+/* Collaboration Task Assignment Modal */
+.collaboration-task-assignment-custom-modal {
+    width: 250px;
+    position: fixed;
+    top: 29%;
+    right: 5%;
+}
+
+.assign-task-cancel-btn {
+    width: 100px;
+}
+
+.assign-task-confirm-btn {
+    width: 100px;
+}

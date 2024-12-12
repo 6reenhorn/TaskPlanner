@@ -33,6 +33,25 @@ app.get('/debug/tasks', async (req, res) => {
     }
 });
 
+// Add request logging middleware
+app.use((req, res, next) => {
+    console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+    next();
+});
+
+// Add debug middleware for all routes
+app.use((req, res, next) => {
+    console.log('Incoming request:', {
+        method: req.method,
+        path: req.path,
+        params: req.params,
+        query: req.query,
+        body: req.body
+    });
+    next();
+});
+
+// Mount routes
 app.use('/api/tasks', taskRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/auth', authRoutes);
@@ -42,8 +61,16 @@ app.use('/api/project-collaborations', collaborationRoutes);
 
 // Error handler
 app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).json({ error: 'Something broke!' });
+    console.error('Error details:', {
+        message: err.message,
+        stack: err.stack,
+        path: req.path,
+        method: req.method
+    });
+    res.status(500).json({ 
+        error: 'Something broke!',
+        details: err.message 
+    });
 });
 
 const PORT = 4000;
