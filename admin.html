@@ -16,8 +16,9 @@
         </button>
 
         <!-- Header -->
-        <div class="header-container d-flex justify-content-start align-items-center border-bottom">
+        <div class="header-container d-flex justify-content-between align-items-center border-bottom">
             <h1>Admin Panel</h1>
+            <button type="button" class="btn btn-danger logout-button">Logout</button>
         </div>
 
         <!-- Sidebar -->
@@ -26,6 +27,7 @@
             <div class="list-group list-group-flush pt-3 navbar-text">
                 <a href="#employeeManagement" class="list-group-item list-group-item-action bg-light">Employee Management</a>
                 <a href="#userManagement" class="list-group-item list-group-item-action bg-light">User Management</a>
+                <a href="#allEntities" class="list-group-item list-group-item-action bg-light">All Entities</a>
                 <a href="#activityLog" class="list-group-item list-group-item-action bg-light">Activity Log</a>
             </div>
         </div>
@@ -41,8 +43,21 @@
                     <!-- Employee Management Content Here -->
                 </div>
                 <div id="userManagement" class="user-management-section admin-main-pages">
-                    <h1>User Management</h1>
-                    <!-- User Management Content Here -->
+                    <h1 class="mb-4">User Management</h1>
+                    <div class="user-cards-container border-bottom">
+                        <!-- User cards will be dynamically inserted here -->
+                    </div>
+                    <div class="user-data-table-container mt-5" id="userTablesContainer">
+                        <!-- User tables will be dynamically inserted here -->
+                    </div>
+                </div>
+                <div id="allEntities" class="all-entities-section admin-main-pages">
+                    <h1>All Entities</h1>
+                    <div class="all-tables-container">
+                        <div id="tablesContainer">
+                            <!-- Tables will be dynamically inserted here -->
+                        </div>
+                    </div>
                 </div>
                 <div id="activityLog" class="activity-log-section admin-main-pages">
                     <h1>Activity Log</h1>

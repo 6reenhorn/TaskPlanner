@@ -8,11 +8,17 @@ const projectTaskRoutes = require('../routes/projectTaskManagement');
 const activityRoutes = require('../routes/activityManagement');
 const collaborationRoutes = require('../routes/collaborationManagement');
 const checklistRoutes = require('../routes/checklistManagement');
+const allDataRoutes = require('../routes/allDataManagement'); // Adjust the path as necessary
+const adminTaskRoutes = require('../routes/adminTaskManagement'); // Adjust the path as necessary
+const adminUserRoutes = require('../routes/adminUserManagement'); // Adjust the path as necessary
+const adminProjectCollaborationRoutes = require('../routes/adminProjectCollaborationManagement'); // Adjust the path as necessary
+const adminProjectRoutes = require('../routes/adminProjectManagement'); // Adjust the path as necessary
+const adminChecklistRoutes = require('../routes/adminChecklistManagement'); // Adjust the path as necessary
 
 const app = express();
 
 app.use(cors({
-    origin: 'http://127.0.0.1:5503',
+    origin: 'http://127.0.0.1:5504',
     credentials: true
 }));
 
@@ -52,6 +58,7 @@ app.use((req, res, next) => {
     next();
 });
 
+
 // Mount routes
 app.use('/api/tasks', taskRoutes);
 app.use('/api/projects', projectRoutes);
@@ -60,6 +67,14 @@ app.use('/api/project-tasks', projectTaskRoutes);
 app.use('/api/activities', activityRoutes);
 app.use('/api/project-collaborations', collaborationRoutes);
 app.use('/api/checklist', checklistRoutes);
+app.use('/api/all', allDataRoutes); // This will make the route accessible at /api/all/tasks
+app.use('/api/admin/tasks', adminTaskRoutes); // Add this line
+app.use('/api/admin/users', adminUserRoutes);
+app.use('/api/admin/projectCollaborations', adminProjectCollaborationRoutes);
+app.use('/api/admin/projects', adminProjectRoutes);
+app.use('/api/admin/checklists', adminChecklistRoutes);
+
+
 // Error handler
 app.use((err, req, res, next) => {
     console.error('Error details:', {

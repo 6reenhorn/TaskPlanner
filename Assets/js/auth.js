@@ -40,8 +40,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 sessionStorage.setItem('user', JSON.stringify(data.user));
                 console.log('User data stored:', data.user);
                 
-                // Redirect to main page
-                window.location.href = 'index.html';
+                // Redirect based on user role
+                if (data.user.role === 'admin') {
+                    window.location.href = 'admin.html'; // Redirect to admin panel
+                } else {
+                    window.location.href = 'index.html'; // Redirect to user page
+                }
             } else {
                 alert('Invalid credentials');
             }

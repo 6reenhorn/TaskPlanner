@@ -124,4 +124,50 @@ router.delete('/:id', async (req, res) => {
     }
 });
 
+// Update project details
+router.put('/:id', async (req, res) => {
+    const projectId = req.params.id;
+    console.log('Incoming PUT request for project ID:', projectId);
+    console.log('Request body:', req.body);
+
+    const { user_id_, project_title, project_comment, project_description, project_start_date, project_end_date, project_status } = req.body;
+
+    const startDate = new Date(project_start_date).toISOString().slice(0, 19).replace('T', ' ');
+    const endDate = new Date(project_end_date).toISOString().slice(0, 19).replace('T', ' ');
+
+    // Log the incoming request data
+    console.log('Updating project with ID:', projectId);
+    console.log('Request body:', req.body);
+
+    try {
+        // Prepare the SQL query and parameters
+        const query = `
+            UPDATE projects 
+            SET user_id_ = ?, project_title = ?, project_comment = ?, project_description = ?, project_start_date = ?, project_end_date = ?, project_status = ? 
+            WHERE project_id_ = ?
+        `;
+        const params = [user_id_, project_title, project_comment, project_description, startDate, endDate, project_status, projectId];
+
+        // Log the query and parameters
+        console.log('Executing query:', query);
+        console.log('With parameters:', params);
+
+        const result = await db.execute(query, params);
+
+        // Log the result of the query
+        console.log('Query result:', result);
+
+        if (result.affectedRows > 0) {
+            console.log('Project updated successfully');
+            res.status(200).json({ message: 'Project updated successfully' });
+        } else {
+            console.log('Project not found');
+            res.status(404).json({ message: 'Project not found' });
+        }
+    } catch (error) {
+        console.error('Error updating project:', error);
+        res.status(500).json({ error: 'Failed to update project' });
+    }
+});
+
 module.exports = router;
